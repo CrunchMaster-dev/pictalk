@@ -11,9 +11,12 @@
 import { CATEGORIES, STARTER_TILES } from "./data.js";
 import * as DB from "./db.js";
 import * as Speech from "./speech.js";
+import * as Keyboard from "./keyboard.js";
+import * as Phrases from "./phrases.js";
 
 // ---- App state -------------------------------------------------------------
 const state = {
+  mode: "pictures", // "pictures" | "keyboard"
   activeCategory: CATEGORIES[0].id,
   personalTiles: [], // [{id, label, say, category, photoBlob}]
   sentence: [], // [{label, say}]
@@ -25,7 +28,12 @@ let photoUrls = [];
 // ---- Tiny DOM helpers ------------------------------------------------------
 const $ = (sel) => document.querySelector(sel);
 const el = (tag, props = {}, ...kids) => {
-  const node = Object.assign(document.createElement(tag), props);
+  const node = document.createElement(tag);
+  for (const [key, val] of Object.entries(props)) {
+    // Hyphenated keys (aria-*, data-*) are attributes, not DOM properties.
+    if (key.includes("-")) node.setAttribute(key, val);
+    else node[key] = val;
+  }
   for (const k of kids) node.append(k);
   return node;
 };
@@ -117,6 +125,41 @@ function clearSentence() {
   renderSentence();
 }
 
+// ---- Mode switching (Pictures <-> Keyboard) --------------------------------
+function speakActive() {
+  if (state.mode === "keyboard") Keyboard.speakCurrent();
+  else speakSentence();
+}
+
+function clearActive() {
+  if (state.mode === "keyboard") Keyboard.clearCurrent();
+  else clearSentence();
+}
+
+async function setMode(mode, { persist = true } = {}) {
+  state.mode = mode;
+  const keyboard = mode === "keyboard";
+
+  // Swap the body: picture board vs keyboard board.
+  $("#categories").hidden = keyboard;
+  $("#grid").hidden = keyboard;
+  if (keyboard) Keyboard.show();
+  else Keyboard.hide();
+
+  // Reset the shared message bar so leftover content from the other mode is gone.
+  if (keyboard) clearSentence(); // empties tokens; keyboard.show() repaints its text
+  else { Keyboard.clearCurrent(); renderSentence(); }
+
+  // Quick-phrase editing only makes sense in keyboard mode.
+  $("#phrases-section").hidden = !keyboard;
+
+  // Reflect the choice in the settings radios.
+  const radio = document.querySelector(`input[name="mode"][value="${mode}"]`);
+  if (radio) radio.checked = true;
+
+  if (persist) await DB.setSetting("mode", mode);
+}
+
 // ---- Parent mode (child-locked) -------------------------------------------
 function openParentGate() {
   const a = 2 + Math.floor(performance.now() % 7); // changes each open
@@ -135,6 +178,8 @@ function openParentGate() {
 async function openParentPanel() {
   await refreshVoiceOptions();
   renderPersonalList();
+  await renderPhraseList();
+  $("#phrases-section").hidden = state.mode !== "keyboard";
   $("#parent-panel").showModal();
 }
 
@@ -220,6 +265,41 @@ async function deletePersonal(id) {
   renderGrid();
 }
 
+// ---- Quick phrases (settings) ----------------------------------------------
+async function renderPhraseList() {
+  const list = $("#phrase-list");
+  const phrases = await Phrases.getPhrases();
+  list.replaceChildren();
+  for (const p of phrases) {
+    const row = el(
+      "div",
+      { className: "personal-row" },
+      el("span", { className: "thumb thumb-emoji", textContent: p.emoji }),
+      el("span", { className: "personal-meta", textContent: p.text }),
+      el("button", {
+        className: "btn danger small",
+        textContent: "Delete",
+        onclick: async () => {
+          await Phrases.deletePhrase(p.id);
+          await renderPhraseList();
+          await Keyboard.refreshPhrases();
+        },
+      })
+    );
+    list.append(row);
+  }
+}
+
+async function addPhrase(ev) {
+  ev.preventDefault();
+  const text = $("#phrase-text").value.trim();
+  if (!text) return;
+  await Phrases.addPhrase(text);
+  $("#phrase-form").reset();
+  await renderPhraseList();
+  await Keyboard.refreshPhrases();
+}
+
 async function onVoiceChange(ev) {
   const uri = ev.target.value;
   Speech.setVoice(uri);
@@ -243,24 +323,35 @@ async function init() {
   // Load personal tiles.
   state.personalTiles = await DB.getAllPersonalTiles();
 
-  // Render.
+  // Render the picture board.
   renderCategories();
   renderGrid();
   renderSentence();
 
-  // Wire controls.
-  $("#speak-btn").onclick = speakSentence;
-  $("#clear-btn").onclick = clearSentence;
+  // Initialize the keyboard board (hidden until selected).
+  await Keyboard.init({ container: $("#keyboard"), messageEl: $("#sentence") });
+
+  // Wire shared controls — they route to whichever board is active.
+  $("#speak-btn").onclick = speakActive;
+  $("#clear-btn").onclick = clearActive;
   $("#gear-btn").onclick = openParentGate;
   $("#parent-close").onclick = closeParentPanel;
   $("#add-form").onsubmit = addPersonal;
   $("#voice-select").onchange = onVoiceChange;
+  $("#phrase-form").onsubmit = addPhrase;
+  for (const radio of document.querySelectorAll('input[name="mode"]')) {
+    radio.onchange = (ev) => setMode(ev.target.value);
+  }
 
   // Populate the parent "category" dropdown.
   const sel = $("#p-category");
   for (const cat of CATEGORIES) {
     sel.append(el("option", { value: cat.id, textContent: cat.name }));
   }
+
+  // Restore the saved mode (defaults to the picture board).
+  const savedMode = await DB.getSetting("mode", "pictures");
+  await setMode(savedMode, { persist: false });
 
   // Register the service worker for offline use (https or localhost only).
   if ("serviceWorker" in navigator) {

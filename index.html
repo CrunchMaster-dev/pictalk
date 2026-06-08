@@ -24,6 +24,8 @@
 
   <main id="grid" class="grid" aria-label="Words"></main>
 
+  <section id="keyboard" class="keyboard" aria-label="Keyboard" hidden></section>
+
   <p id="no-speech" class="no-speech" hidden>
     This device's browser can't speak out loud. The tiles still work, but you may
     need a different browser (Chrome, Safari, or Edge) for the voice.
@@ -35,6 +37,33 @@
       <h2>Parent settings</h2>
       <button id="parent-close" class="btn small" aria-label="Close">Done</button>
     </div>
+
+    <section class="parent-section">
+      <h3>Mode</h3>
+      <p class="muted">Choose how this device talks. Picture board for a child who
+        taps pictures; Keyboard for someone who can read and type.</p>
+      <div class="mode-switch">
+        <label class="mode-opt">
+          <input type="radio" name="mode" value="pictures" /> 🖼️ Picture board
+        </label>
+        <label class="mode-opt">
+          <input type="radio" name="mode" value="keyboard" /> ⌨️ Keyboard
+        </label>
+      </div>
+    </section>
+
+    <section id="phrases-section" class="parent-section" hidden>
+      <h3>Quick phrases</h3>
+      <p class="muted">One-tap sentences for the keyboard. Tapping one speaks it
+        instantly — great for urgent or common things.</p>
+      <form id="phrase-form" class="add-form">
+        <label>New quick phrase
+          <input id="phrase-text" type="text" placeholder="I need my medicine" maxlength="120" />
+        </label>
+        <button type="submit" class="btn primary">Add phrase</button>
+      </form>
+      <div id="phrase-list" class="personal-list"></div>
+    </section>
 
     <section class="parent-section">
       <h3>Add a personal tile</h3>
