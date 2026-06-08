@@ -1,0 +1,6 @@
+# Playwright MCP test artifacts
+.playwright-mcp/
+
+# OS cruft
+Thumbs.db
+.DS_Store

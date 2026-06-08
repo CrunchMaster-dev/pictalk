@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1d6fb8" />
+  <title>PicTalk</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div id="sentence" class="sentence" aria-live="polite" aria-label="Sentence"></div>
+    <div class="controls">
+      <button id="speak-btn" class="btn speak" aria-label="Speak sentence">▶ Speak</button>
+      <button id="clear-btn" class="btn clear" aria-label="Clear sentence">✕</button>
+      <button id="gear-btn" class="btn gear" aria-label="Parent settings">⚙</button>
+    </div>
+  </header>
+
+  <nav id="categories" class="categories" aria-label="Categories"></nav>
+
+  <main id="grid" class="grid" aria-label="Words"></main>
+
+  <p id="no-speech" class="no-speech" hidden>
+    This device's browser can't speak out loud. The tiles still work, but you may
+    need a different browser (Chrome, Safari, or Edge) for the voice.
+  </p>
+
+  <!-- Parent mode -->
+  <dialog id="parent-panel" class="parent-panel">
+    <div class="parent-head">
+      <h2>Parent settings</h2>
+      <button id="parent-close" class="btn small" aria-label="Close">Done</button>
+    </div>
+
+    <section class="parent-section">
+      <h3>Add a personal tile</h3>
+      <p class="muted">Add the people and things in your child's life — a real photo
+        of Mom, your dog, a favorite toy.</p>
+      <form id="add-form" class="add-form">
+        <label>Word it says
+          <input id="p-label" type="text" placeholder="Mama" maxlength="30" required />
+        </label>
+        <label>Category
+          <select id="p-category"></select>
+        </label>
+        <label>Speak differently? (optional)
+          <input id="p-say" type="text" placeholder="leave blank to say the word above" maxlength="60" />
+        </label>
+        <label>Photo (optional)
+          <input id="p-photo" type="file" accept="image/*" capture="environment" />
+        </label>
+        <button type="submit" class="btn primary">Add tile</button>
+      </form>
+    </section>
+
+    <section class="parent-section">
+      <h3>Your personal tiles</h3>
+      <div id="personal-list" class="personal-list"></div>
+    </section>
+
+    <section class="parent-section">
+      <h3>Voice</h3>
+      <label>Speaking voice
+        <select id="voice-select"></select>
+      </label>
+    </section>
+
+    <p class="privacy">🔒 Everything you add — photos, names, words — stays on this
+      device only. Nothing is ever uploaded.</p>
+  </dialog>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
