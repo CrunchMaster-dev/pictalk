@@ -1,5 +1,10 @@
 # PicTalk 🗣️
 
+### ▶️ Live app: **https://crunchmaster-dev.github.io/pictalk/**
+
+Open that link on any phone, tablet, or computer, then "Add to Home Screen" to
+install it. It works offline after the first visit, and nothing is ever uploaded.
+
 A **free, private, offline talking picture board** for non-speaking children.
 A child taps pictures to speak — "I want apple" — on any cheap tablet, phone, or
 Chromebook. No account, no subscription, nothing uploaded.
