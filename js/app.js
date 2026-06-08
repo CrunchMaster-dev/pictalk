@@ -13,6 +13,7 @@ import * as DB from "./db.js";
 import * as Speech from "./speech.js";
 import * as Keyboard from "./keyboard.js";
 import * as Phrases from "./phrases.js";
+import * as Scanning from "./scanning.js";
 
 // ---- App state -------------------------------------------------------------
 const state = {
@@ -158,6 +159,19 @@ async function setMode(mode, { persist = true } = {}) {
   if (radio) radio.checked = true;
 
   if (persist) await DB.setSetting("mode", mode);
+
+  // The set of scannable items changed with the board — rebuild if scanning.
+  Scanning.restart();
+}
+
+// The actionable elements on the active board, for the scanning engine.
+function collectScanItems() {
+  const shared = ["#speak-btn", "#clear-btn", "#gear-btn"];
+  const perMode =
+    state.mode === "keyboard"
+      ? ["#keyboard .pred", "#keyboard .key", "#keyboard .quick"]
+      : ["#categories .cat", "#grid .tile"];
+  return [...shared, ...perMode].flatMap((sel) => [...document.querySelectorAll(sel)]);
 }
 
 // ---- Parent mode (child-locked) -------------------------------------------
@@ -176,6 +190,7 @@ function openParentGate() {
 }
 
 async function openParentPanel() {
+  Scanning.pause(); // let a caregiver use settings with normal taps
   await refreshVoiceOptions();
   renderPersonalList();
   await renderPhraseList();
@@ -185,6 +200,7 @@ async function openParentPanel() {
 
 function closeParentPanel() {
   $("#parent-panel").close();
+  Scanning.resume();
 }
 
 async function refreshVoiceOptions() {
@@ -307,6 +323,20 @@ async function onVoiceChange(ev) {
   Speech.speak("Hello! This is your voice.");
 }
 
+// ---- Switch scanning settings ----------------------------------------------
+async function applyScanSettings() {
+  const enabled = $("#scan-enable").checked;
+  const stepMs = parseInt($("#scan-speed").value, 10);
+  const audio = $("#scan-audio").checked;
+  await DB.setSetting("scanEnabled", enabled);
+  await DB.setSetting("scanStepMs", stepMs);
+  await DB.setSetting("scanAudio", audio);
+  // Keep scanning paused while the settings dialog is open; it resumes on close.
+  // configure() updates the stored config so resume() uses the new speed/audio.
+  Scanning.configure({ enabled, stepMs, audio });
+  if ($("#parent-panel").open) Scanning.pause();
+}
+
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // ---- Boot ------------------------------------------------------------------
@@ -331,6 +361,9 @@ async function init() {
   // Initialize the keyboard board (hidden until selected).
   await Keyboard.init({ container: $("#keyboard"), messageEl: $("#sentence") });
 
+  // The scanning engine reads the active board's items and speaks labels.
+  Scanning.init({ collectItems: collectScanItems, speak: (t) => Speech.speak(t) });
+
   // Wire shared controls — they route to whichever board is active.
   $("#speak-btn").onclick = speakActive;
   $("#clear-btn").onclick = clearActive;
@@ -342,6 +375,9 @@ async function init() {
   for (const radio of document.querySelectorAll('input[name="mode"]')) {
     radio.onchange = (ev) => setMode(ev.target.value);
   }
+  $("#scan-enable").onchange = applyScanSettings;
+  $("#scan-speed").onchange = applyScanSettings;
+  $("#scan-audio").onchange = applyScanSettings;
 
   // Populate the parent "category" dropdown.
   const sel = $("#p-category");
@@ -352,6 +388,15 @@ async function init() {
   // Restore the saved mode (defaults to the picture board).
   const savedMode = await DB.getSetting("mode", "pictures");
   await setMode(savedMode, { persist: false });
+
+  // Restore switch-scanning settings, then start the engine if enabled.
+  const scanEnabled = await DB.getSetting("scanEnabled", false);
+  const scanStepMs = await DB.getSetting("scanStepMs", 1500);
+  const scanAudio = await DB.getSetting("scanAudio", true);
+  $("#scan-enable").checked = scanEnabled;
+  $("#scan-speed").value = String(scanStepMs);
+  $("#scan-audio").checked = scanAudio;
+  Scanning.configure({ enabled: scanEnabled, stepMs: scanStepMs, audio: scanAudio });
 
   // Register the service worker for offline use (https or localhost only).
   if ("serviceWorker" in navigator) {

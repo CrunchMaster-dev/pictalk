@@ -52,6 +52,28 @@
       </div>
     </section>
 
+    <section class="parent-section">
+      <h3>Switch scanning</h3>
+      <p class="muted">For someone who can't touch the screen accurately. The device
+        highlights items one at a time; press a switch — the spacebar, Enter, or a tap
+        anywhere — to select. Works with plug-in assistive switches too.</p>
+      <label class="check-row">
+        <input id="scan-enable" type="checkbox" /> Turn on switch scanning
+      </label>
+      <label>Scan speed
+        <select id="scan-speed">
+          <option value="700">Fast (0.7s)</option>
+          <option value="1000">Quick (1s)</option>
+          <option value="1500" selected>Medium (1.5s)</option>
+          <option value="2000">Slow (2s)</option>
+          <option value="3000">Very slow (3s)</option>
+        </select>
+      </label>
+      <label class="check-row">
+        <input id="scan-audio" type="checkbox" checked /> Speak each item as it highlights
+      </label>
+    </section>
+
     <section id="phrases-section" class="parent-section" hidden>
       <h3>Quick phrases</h3>
       <p class="muted">One-tap sentences for the keyboard. Tapping one speaks it

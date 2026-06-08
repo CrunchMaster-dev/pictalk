@@ -15,6 +15,13 @@ need them most.
 - **Sentence building** — tap several tiles, then press ▶ Speak to say the whole thing.
 - **Parent mode** (behind a simple math gate) to add **personal tiles** with a real
   photo and the word it should say — "Mama", your dog, a favorite toy.
+- **Two boards in one app:** a **picture board** for non-reading children, and a
+  **keyboard** (with learning word prediction + one-tap Quick Phrases) for literate
+  adults who can't speak. Switch between them in settings.
+- **Switch scanning** for people who can't touch the screen: the device highlights
+  items one at a time and the user selects with a single switch — the spacebar, Enter,
+  a tap anywhere, or any plug-in assistive switch. Row-column scanning, adjustable
+  speed, and optional spoken cues. Turn it on in settings.
 - **Works offline.** After the first load it runs with no internet.
 - **Private by design.** Photos and names are stored only on the device
   (`IndexedDB`) and are never uploaded anywhere.
@@ -47,12 +54,13 @@ Then open **http://localhost:8123** in Chrome, Edge, or Safari.
 - **Parent:** tap the **⚙ gear**, solve the little math problem (keeps kids out),
   then add personal tiles and pick the speaking voice.
 
-## What's planned next (not in this first version)
+## What's planned next
 
 - ARASAAC symbol images as an option alongside emoji
-- A text keyboard + word prediction for literate users (stroke / ALS adults)
+- Two-switch step scanning and group/block scanning for very large grids
 - Rearranging the board, folders, multiple child profiles
-- Switch / eye-gaze access for kids who can't use a touchscreen
+- Eye-gaze / dwell access
+- Hosting it on a free public URL to share with families
 
 ## Tech notes
 
