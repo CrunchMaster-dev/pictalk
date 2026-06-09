@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to use PicTalk — a quick guide</title>
+  <meta name="description" content="A simple step-by-step guide for parents, caregivers, and teachers: how to set up and use PicTalk — picture board, adding photos, the keyboard, and switch access." />
+  <meta name="theme-color" content="#1d6fb8" />
+  <link rel="icon" href="./app/icons/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./landing.css" />
+  <style>
+    .guide-head { max-width: 760px; margin: 0 auto; padding: 56px 24px 8px; text-align: center; }
+    .guide-head h1 { font-size: clamp(32px, 5vw, 46px); font-weight: 900; }
+    .guide-head p { font-size: 19px; color: var(--muted); margin-top: 12px; }
+    .toc {
+      max-width: 760px; margin: 24px auto 0; padding: 0 24px;
+      display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
+    }
+    .toc a {
+      background: var(--soft); color: var(--blue-dark); text-decoration: none;
+      font-weight: 700; font-size: 14px; padding: 8px 16px; border-radius: 999px;
+    }
+    .toc a:hover { background: #e0e9f3; }
+
+    .step {
+      max-width: 920px; margin: 0 auto; padding: 40px 24px;
+      display: grid; grid-template-columns: 1fr 300px; gap: 40px; align-items: center;
+      border-top: 1px solid var(--line);
+    }
+    .step:nth-child(even) { grid-template-columns: 300px 1fr; }
+    .step:nth-child(even) .step-body { order: 2; }
+    .step-badge {
+      display: inline-flex; align-items: center; gap: 10px; margin-bottom: 10px;
+    }
+    .step-num {
+      width: 38px; height: 38px; border-radius: 50%; background: var(--blue); color: #fff;
+      font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center;
+    }
+    .step-kicker { font-weight: 800; font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--green-dark); }
+    .step h2 { font-size: clamp(22px, 3vw, 28px); margin-bottom: 10px; }
+    .step p { font-size: 16.5px; color: var(--body); margin-bottom: 10px; }
+    .step ul { margin: 0 0 4px 1.1em; color: var(--body); font-size: 16px; }
+    .step ul li { margin-bottom: 6px; }
+    .step b { color: var(--ink); }
+    .step-shot { display: flex; justify-content: center; }
+    .phone-sm {
+      width: 280px; max-width: 78vw;
+      border: 9px solid #0e1f33; border-radius: 32px; background: #0e1f33;
+      overflow: hidden; line-height: 0; box-shadow: 0 16px 40px rgba(21,50,79,0.22);
+    }
+    .phone-sm img { width: 100%; display: block; }
+
+    .guide-cta {
+      max-width: 760px; margin: 8px auto 0; padding: 56px 24px; text-align: center;
+      border-top: 1px solid var(--line);
+    }
+    .guide-cta h2 { font-size: clamp(24px, 4vw, 32px); }
+    .guide-cta p { font-size: 18px; color: var(--muted); margin: 12px auto 22px; max-width: 56ch; }
+    .guide-cta .btn { margin: 6px; }
+
+    @media (max-width: 720px) {
+      .step, .step:nth-child(even) { grid-template-columns: 1fr; gap: 22px; }
+      .step-body, .step:nth-child(even) .step-body { order: 1; }
+      .step-shot { order: 2; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="nav">
+    <a class="brand" href="/" aria-label="PicTalk home">
+      <img src="./app/icons/icon.svg" alt="" width="40" height="40" />
+      <span>PicTalk</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="/">Home</a>
+      <a class="btn btn-primary btn-sm" href="./app/">Open PicTalk</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <div class="guide-head">
+      <h1>How to use PicTalk</h1>
+      <p>A 5-minute guide for parents, caregivers, and teachers. No tech skills needed —
+        if you can tap a picture, you can do this.</p>
+    </div>
+    <nav class="toc" aria-label="Guide contents">
+      <a href="#start">1. Get started</a>
+      <a href="#talk">2. Talk with pictures</a>
+      <a href="#personal">3. Make it personal</a>
+      <a href="#type">4. Type to talk</a>
+      <a href="#switch">5. Switch access</a>
+      <a href="#tips">6. Tips &amp; help</a>
+    </nav>
+
+    <!-- 1 -->
+    <section id="start" class="step">
+      <div class="step-body">
+        <div class="step-badge"><span class="step-num">1</span><span class="step-kicker">Get started</span></div>
+        <h2>Open it, then install it</h2>
+        <ul>
+          <li>Open PicTalk in any web browser (Chrome, Safari, or Edge).</li>
+          <li>Tap your browser's menu and choose <b>"Add to Home Screen."</b> Now it's an
+            app icon — and it works <b>offline</b> from then on.</li>
+          <li>Tap any picture and PicTalk says the word out loud. That's it!</li>
+        </ul>
+        <a class="btn btn-primary" href="./app/">▶ Open PicTalk</a>
+      </div>
+      <div class="step-shot"><div class="phone-sm"><img src="./hero-app.png" alt="The PicTalk picture board with rows of word tiles" /></div></div>
+    </section>
+
+    <!-- 2 -->
+    <section id="talk" class="step">
+      <div class="step-body">
+        <div class="step-badge"><span class="step-num">2</span><span class="step-kicker">The basics</span></div>
+        <h2>Talk with pictures</h2>
+        <ul>
+          <li>Tap a picture — it speaks the word and adds it to the bar at the top.</li>
+          <li>Tap a few to build a sentence, like <b>"I want apple,"</b> then press the
+            green <b>▶ Speak</b> button to say the whole thing.</li>
+          <li>Use the <b>✕</b> to clear, and the row of <b>categories</b> (People, Food,
+            Feelings…) to find more words.</li>
+        </ul>
+      </div>
+      <div class="step-shot"><div class="phone-sm"><img src="./guide-talk.png" alt="PicTalk showing the words I, want, apple in the sentence bar" /></div></div>
+    </section>
+
+    <!-- 3 -->
+    <section id="personal" class="step">
+      <div class="step-body">
+        <div class="step-badge"><span class="step-num">3</span><span class="step-kicker">Personalize</span></div>
+        <h2>Make it personal</h2>
+        <ul>
+          <li>Tap the <b>⚙ gear</b> and solve the little math question (this keeps kids
+            out of settings).</li>
+          <li>Under <b>"Add a personal tile,"</b> type a word (like <b>"Mama"</b>), pick a
+            category, and add a <b>real photo</b> from your device.</li>
+          <li>Now your child can tap a real picture of the people and things they love. You
+            can also choose the speaking <b>voice</b> here.</li>
+        </ul>
+      </div>
+      <div class="step-shot"><div class="phone-sm"><img src="./guide-personal.png" alt="The parent settings panel showing the Add a personal tile form" /></div></div>
+    </section>
+
+    <!-- 4 -->
+    <section id="type" class="step">
+      <div class="step-body">
+        <div class="step-badge"><span class="step-num">4</span><span class="step-kicker">For readers</span></div>
+        <h2>Type to talk</h2>
+        <ul>
+          <li>For someone who can read and spell (for example, after a stroke or with
+            ALS), open the <b>⚙ gear → Mode → Keyboard</b>.</li>
+          <li>Type and press Speak. <b>Word prediction</b> above the keys speeds things up,
+            and it learns the words used most.</li>
+          <li><b>Quick Phrases</b> at the bottom speak a whole sentence with one tap — like
+            <b>"I'm in pain."</b> Add your own in settings.</li>
+        </ul>
+      </div>
+      <div class="step-shot"><div class="phone-sm"><img src="./guide-keyboard.png" alt="PicTalk keyboard mode with word predictions and quick phrases" /></div></div>
+    </section>
+
+    <!-- 5 -->
+    <section id="switch" class="step">
+      <div class="step-body">
+        <div class="step-badge"><span class="step-num">5</span><span class="step-kicker">Hands-free</span></div>
+        <h2>Switch access</h2>
+        <ul>
+          <li>For someone who can't touch the screen, turn on <b>⚙ gear → Switch
+            scanning</b>.</li>
+          <li>PicTalk highlights the choices one group at a time. The person presses a
+            <b>switch</b> — the <b>spacebar</b>, <b>Enter</b>, a tap anywhere, or a
+            plug-in button — to pick.</li>
+          <li>Set the <b>speed</b> to match the person, and turn on <b>speaking each item</b>
+            so they can choose by ear.</li>
+        </ul>
+      </div>
+      <div class="step-shot"><div class="phone-sm"><img src="./guide-switch.png" alt="PicTalk highlighting a row of tiles for switch scanning" /></div></div>
+    </section>
+
+    <!-- 6 -->
+    <section id="tips" class="step" style="grid-template-columns: 1fr;">
+      <div class="step-body">
+        <div class="step-badge"><span class="step-num">6</span><span class="step-kicker">Make it stick</span></div>
+        <h2>Tips &amp; getting help</h2>
+        <ul>
+          <li><b>Model it.</b> Use PicTalk yourself while you talk ("I want a <em>snack</em>")
+            so the person sees how it works — this is how people learn it fastest.</li>
+          <li><b>Start small.</b> A handful of motivating words (favorite foods, people,
+            "more," "all done") beats a huge board at first.</li>
+          <li><b>Let mistakes happen.</b> Exploring and tapping is how someone learns — there's
+            nothing to break.</li>
+          <li><b>It's all private.</b> Photos and words stay on the device. Nothing is uploaded.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="guide-cta">
+      <h2>Want a hand setting it up?</h2>
+      <p>Tell us about the person it's for, and we'll help you build the perfect board —
+        for free. You don't have to figure this out alone.</p>
+      <a class="btn btn-primary btn-lg" href="mailto:Groundworkshelps@gmail.com?subject=Help%20setting%20up%20PicTalk">Email us for free help →</a>
+      <a class="btn btn-ghost btn-lg" href="./app/">▶ Open PicTalk</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-row">
+      <a class="brand brand-foot" href="/">
+        <img src="./app/icons/icon.svg" alt="" width="32" height="32" />
+        <span>PicTalk</span>
+      </a>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="/">Home</a>
+        <a href="./app/">Open the app</a>
+        <a href="mailto:Groundworkshelps@gmail.com">Contact</a>
+      </nav>
+    </div>
+    <p class="footer-note">🔒 Private by design — nothing ever leaves the person's device. · Free &amp; always will be.</p>
+  </footer>
+</body>
+</html>
