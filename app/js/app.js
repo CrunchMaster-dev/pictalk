@@ -14,6 +14,9 @@ import * as Speech from "./speech.js";
 import * as Keyboard from "./keyboard.js";
 import * as Phrases from "./phrases.js";
 import * as Scanning from "./scanning.js";
+import * as Cloud from "./cloud.js";
+import * as Sync from "./sync.js";
+import { freePlusConfigured } from "./config.js";
 
 // ---- App state -------------------------------------------------------------
 const state = {
@@ -339,6 +342,116 @@ async function applyScanSettings() {
 
 const capitalize = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// ---- Free+ (optional cloud backup & sync) ----------------------------------
+// Stays completely hidden unless config.js is filled in and enabled.
+const CONFLICT_MSG =
+  "This device and your saved backup both have changes.\n\n" +
+  "OK = keep THIS device's words & photos\n" +
+  "Cancel = use your SAVED backup";
+
+async function setupFreePlus() {
+  if (!freePlusConfigured()) return;
+  $("#freeplus-section").hidden = false;
+
+  const showSignedIn = (user) => {
+    $("#fp-signedout").hidden = !!user;
+    $("#fp-signedin").hidden = !user;
+  };
+
+  async function refreshStatus() {
+    const at = await Sync.lastSyncedAt();
+    $("#fp-status").textContent = at
+      ? `Backed up ✓ — last synced ${new Date(at).toLocaleString()}`
+      : "Signed in. Not backed up yet — tap Sync now.";
+  }
+
+  async function handleReconcile(user) {
+    const r = await Sync.reconcile(user);
+    if (r.action === "conflict") {
+      const keepLocal = confirm(CONFLICT_MSG);
+      await Sync.resolveConflict(user, keepLocal ? "local" : "cloud");
+      if (!keepLocal) { location.reload(); return; }
+    } else if (r.action === "pulled") {
+      location.reload();
+      return;
+    }
+    await refreshStatus();
+  }
+
+  async function onSignedIn(user) {
+    showSignedIn(user);
+    try {
+      await Cloud.ensureProfile(user);
+      await handleReconcile(user);
+    } catch (e) {
+      console.warn("Free+ sync error:", e);
+      $("#fp-status").textContent = "Signed in. (Couldn't reach the cloud just now.)";
+    }
+  }
+
+  $("#fp-login-form").onsubmit = async (ev) => {
+    ev.preventDefault();
+    const email = $("#fp-email").value.trim();
+    if (!email) return;
+    const msg = $("#fp-login-msg");
+    try {
+      await Cloud.sendMagicLink(email);
+      msg.textContent = "Check your email for a sign-in link, then come back to this page.";
+    } catch (e) {
+      msg.textContent = "Couldn't send the link — check the email and try again.";
+    }
+    msg.hidden = false;
+  };
+
+  $("#fp-sync").onclick = async () => {
+    const user = await Cloud.getUser();
+    if (!user) return;
+    $("#fp-status").textContent = "Syncing…";
+    try { await handleReconcile(user); }
+    catch (e) { $("#fp-status").textContent = "Couldn't sync just now."; }
+  };
+
+  $("#fp-signout").onclick = async () => { await Cloud.signOut(); showSignedIn(null); };
+  $("#fp-export").onclick = exportMyData;
+
+  $("#fp-delete").onclick = async () => {
+    const user = await Cloud.getUser();
+    if (!user) return;
+    if (!confirm("Delete your account and everything backed up to the cloud? This can't be undone.\n\n(Your words stay on THIS device.)")) return;
+    try { await Cloud.deleteAllData(user); await Cloud.signOut(); } catch (e) { console.warn(e); }
+    showSignedIn(null);
+  };
+
+  await Cloud.onAuthChange((user) => { if (user) onSignedIn(user); else showSignedIn(null); });
+  const current = await Cloud.getUser();
+  if (current) onSignedIn(current); else showSignedIn(null);
+}
+
+async function exportMyData() {
+  const board = await DB.dumpBoard();
+  const tiles = [];
+  for (const t of board.tiles) {
+    tiles.push({
+      id: t.id, label: t.label, say: t.say, category: t.category,
+      photo: t.photoBlob ? await blobToDataURL(t.photoBlob) : null,
+    });
+  }
+  const data = { exportedAt: new Date().toISOString(), tiles, settings: board.settings };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = el("a", { href: url, download: "pictalk-my-data.json" });
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function blobToDataURL(blob) {
+  return new Promise((res) => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.readAsDataURL(blob);
+  });
+}
+
 // ---- Boot ------------------------------------------------------------------
 async function init() {
   if (!Speech.isSupported()) {
@@ -411,6 +524,9 @@ async function init() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
+
+  // Free+ (optional cloud backup & sync) — no-op unless configured + enabled.
+  setupFreePlus().catch((e) => console.warn("Free+ unavailable:", e));
 }
 
 init();

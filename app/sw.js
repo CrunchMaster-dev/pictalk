@@ -4,7 +4,7 @@
 // cache first (instant + offline), falling back to network for anything new.
 // Bump CACHE_VERSION whenever the app files change so users get the update.
 
-const CACHE_VERSION = "pictalk-v4";
+const CACHE_VERSION = "pictalk-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -18,6 +18,9 @@ const APP_SHELL = [
   "./js/keyboard.js",
   "./js/phrases.js",
   "./js/scanning.js",
+  "./js/config.js",
+  "./js/cloud.js",
+  "./js/sync.js",
   "./icons/icon.svg",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

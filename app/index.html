@@ -50,6 +50,35 @@
       </a>
     </section>
 
+    <section id="freeplus-section" class="parent-section" hidden>
+      <h3>Free+ — back up &amp; sync <span class="fp-free">free</span></h3>
+      <p class="muted">Optional. Create a free account to back up this board and sync it to
+        your other devices. The app works fully offline without it — nothing is uploaded
+        unless you sign in, and you can delete everything anytime.</p>
+
+      <div id="fp-signedout">
+        <form id="fp-login-form" class="add-form">
+          <label>Your email
+            <input id="fp-email" type="email" placeholder="you@example.com" autocomplete="email" required />
+          </label>
+          <button type="submit" class="btn primary">Email me a sign-in link</button>
+        </form>
+        <p id="fp-login-msg" class="muted" hidden></p>
+      </div>
+
+      <div id="fp-signedin" hidden>
+        <p id="fp-status" class="muted"></p>
+        <div class="fp-actions">
+          <button id="fp-sync" class="btn primary">Sync now</button>
+          <button id="fp-export" class="btn small">Export my data</button>
+          <button id="fp-signout" class="btn small">Sign out</button>
+          <button id="fp-delete" class="btn danger small">Delete my account &amp; data</button>
+        </div>
+      </div>
+      <p class="privacy">🔒 Your photos, names, and words are yours — exported or deleted
+        on request, anytime.</p>
+    </section>
+
     <section class="parent-section">
       <h3>Mode</h3>
       <p class="muted">Choose how this device talks. Picture board for a child who

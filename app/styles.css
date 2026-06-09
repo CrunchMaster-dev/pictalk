@@ -388,3 +388,11 @@ body {
   border: 2px solid #d4dce6; border-radius: 12px;
 }
 .help-link:hover { border-color: #1d6fb8; }
+
+/* ---- Free+ section ---- */
+.fp-free {
+  font-size: 12px; font-weight: 800; color: #1f6b47; background: #eafaf1;
+  border-radius: 999px; padding: 2px 9px; vertical-align: middle;
+}
+.fp-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+#fp-status { font-weight: 600; color: #15324f; }

@@ -74,3 +74,28 @@ export async function getSetting(key, fallback = null) {
 export async function setSetting(key, value) {
   return tx("settings", "readwrite", (store) => store.put({ key, value }));
 }
+
+// ---- Board snapshot (for Free+ sync) ---------------------------------------
+// The "board" is everything a user created: personal tiles (with photos) plus the
+// handful of settings that personalize the experience.
+const BOARD_SETTING_KEYS = [
+  "voiceURI", "mode", "scanEnabled", "scanStepMs", "scanAudio", "quickPhrases",
+];
+
+// Return the full local board: tiles (incl. photo Blobs) + board settings.
+export async function dumpBoard() {
+  const tiles = await getAllPersonalTiles();
+  const settings = {};
+  for (const k of BOARD_SETTING_KEYS) {
+    const v = await getSetting(k, undefined);
+    if (v !== undefined) settings[k] = v;
+  }
+  return { tiles, settings };
+}
+
+// Replace the local board with the given one (used when the cloud copy wins).
+export async function replaceBoard({ tiles = [], settings = {} }) {
+  await tx("tiles", "readwrite", (store) => store.clear());
+  for (const t of tiles) await addPersonalTile(t);
+  for (const [k, v] of Object.entries(settings)) await setSetting(k, v);
+}
