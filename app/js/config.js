@@ -7,11 +7,11 @@
 // The anon key is a PUBLISHABLE key (safe in client code). Never put the service_role
 // key here.
 
-export const SUPABASE_URL = "";        // e.g. https://abcdxyz.supabase.co
-export const SUPABASE_ANON_KEY = "";   // the "anon public" key from Supabase API settings
+export const SUPABASE_URL = "https://tdkxavrchuhenjqvijtw.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_sqBlnnK4Z_PlMT2ZbHoGEg_XRGDjV9M";
 
 // Flip to true only after both values above are set and the schema has been run.
-export const FREEPLUS_ENABLED = false;
+export const FREEPLUS_ENABLED = true;
 
 // True only when Free+ is enabled AND configured.
 export function freePlusConfigured() {
