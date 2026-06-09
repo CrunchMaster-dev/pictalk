@@ -38,7 +38,10 @@ function tx(storeName, mode, fn) {
         const t = db.transaction(storeName, mode);
         const store = t.objectStore(storeName);
         const result = fn(store);
-        t.oncomplete = () => resolve(result && result.__value !== undefined ? result.__value : result);
+        // Unwrap reqValue holders by their MARKER, not by whether __value is set —
+        // a missing key leaves __value undefined, and the holder itself must never
+        // leak out (it's truthy, which broke getSetting's fallback).
+        t.oncomplete = () => resolve(result && result.__isReqValue ? result.__value : result);
         t.onerror = () => reject(t.error);
         t.onabort = () => reject(t.error);
       })
@@ -47,7 +50,7 @@ function tx(storeName, mode, fn) {
 
 // Wrap a single IDBRequest so the transaction's oncomplete can return its value.
 function reqValue(request) {
-  const holder = { __value: undefined };
+  const holder = { __isReqValue: true, __value: undefined };
   request.onsuccess = () => {
     holder.__value = request.result;
   };
@@ -80,6 +83,8 @@ export async function setSetting(key, value) {
 // handful of settings that personalize the experience.
 const BOARD_SETTING_KEYS = [
   "voiceURI", "mode", "scanEnabled", "scanStepMs", "scanAudio", "quickPhrases",
+  "theme", "colorCoding", "tileSize", "autoClear", "speakOnTap",
+  "scanHoldMs", "scanDebounceMs", "rate",
 ];
 
 // Return the full local board: tiles (incl. photo Blobs) + board settings.

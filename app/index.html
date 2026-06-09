@@ -15,14 +15,23 @@
     <div id="sentence" class="sentence" aria-live="polite" aria-label="Sentence"></div>
     <div class="controls">
       <button id="speak-btn" class="btn speak" aria-label="Speak sentence">▶ Speak</button>
-      <button id="clear-btn" class="btn clear" aria-label="Clear sentence">✕</button>
+      <button id="undo-btn" class="btn undo" aria-label="Remove last word">⌫</button>
+      <button id="clear-btn" class="btn clear" aria-label="Clear sentence (hold)">✕</button>
       <button id="gear-btn" class="btn gear" aria-label="Parent settings">⚙</button>
     </div>
   </header>
 
+  <div id="toast" class="toast" role="status"></div>
+
   <div id="firstrun-hint" class="hint" hidden>
     <span>👋 Tap a picture to talk, then press <b>▶ Speak</b>. Tap <b>⚙</b> anytime for help.</span>
     <button id="hint-dismiss" class="btn small">Got it</button>
+  </div>
+
+  <div id="ios-hint" class="hint" hidden>
+    <span>📲 Install PicTalk: tap <b>Share</b> <span aria-hidden="true">⬆️</span>, then
+      <b>Add to Home Screen</b> — it works offline like a real app.</span>
+    <button id="ios-hint-dismiss" class="btn small">Got it</button>
   </div>
 
   <nav id="categories" class="categories" aria-label="Categories"></nav>
@@ -94,6 +103,39 @@
     </section>
 
     <section class="parent-section">
+      <h3>Look &amp; feel</h3>
+      <label>Theme
+        <select id="theme-select">
+          <option value="auto">Auto (match device)</option>
+          <option value="light" selected>Light</option>
+          <option value="dark">Dark</option>
+          <option value="contrast">High contrast (for low vision)</option>
+        </select>
+      </label>
+      <label>Tile size
+        <select id="tilesize-select">
+          <option value="small">Smaller (more tiles on screen)</option>
+          <option value="medium" selected>Medium</option>
+          <option value="large">Larger (easier to hit)</option>
+        </select>
+      </label>
+      <label class="check-row">
+        <input id="color-coding" type="checkbox" checked /> Color-code words by type
+        (people, actions, feelings…)
+      </label>
+    </section>
+
+    <section class="parent-section">
+      <h3>Talking</h3>
+      <label class="check-row">
+        <input id="speak-on-tap" type="checkbox" checked /> Speak each word when tapped
+      </label>
+      <label class="check-row">
+        <input id="auto-clear" type="checkbox" /> Clear the sentence after ▶ Speak
+      </label>
+    </section>
+
+    <section class="parent-section">
       <h3>Switch scanning</h3>
       <p class="muted">For someone who can't touch the screen accurately. The device
         highlights items one at a time; press a switch — the spacebar, Enter, or a tap
@@ -112,6 +154,22 @@
       </label>
       <label class="check-row">
         <input id="scan-audio" type="checkbox" checked /> Speak each item as it highlights
+      </label>
+      <label>Hold the switch to select (filters accidental taps)
+        <select id="scan-hold">
+          <option value="0" selected>Off — any press selects</option>
+          <option value="200">Short hold (0.2s)</option>
+          <option value="400">Medium hold (0.4s)</option>
+          <option value="800">Long hold (0.8s)</option>
+        </select>
+      </label>
+      <label>Ignore repeat presses after selecting
+        <select id="scan-debounce">
+          <option value="0" selected>Off</option>
+          <option value="500">0.5 seconds</option>
+          <option value="1000">1 second</option>
+          <option value="2000">2 seconds</option>
+        </select>
       </label>
     </section>
 
@@ -159,6 +217,12 @@
       <label>Speaking voice
         <select id="voice-select"></select>
       </label>
+      <div class="voice-row">
+        <label>Speaking speed
+          <input id="rate-slider" type="range" min="0.6" max="1.4" step="0.05" value="0.95" />
+        </label>
+        <button id="voice-test" type="button" class="btn small">🔊 Test</button>
+      </div>
     </section>
 
     <p class="privacy">🔒 Everything you add — photos, names, words — stays on this

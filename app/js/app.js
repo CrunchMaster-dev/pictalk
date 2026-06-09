@@ -8,11 +8,12 @@
 //   5. A child-locked Parent mode (math gate) lets a grown-up add personal tiles
 //      (real photo + spoken word) and pick the speaking voice.
 
-import { CATEGORIES, STARTER_TILES } from "./data.js";
+import { CATEGORIES, STARTER_TILES, CATEGORY_FITZ } from "./data.js";
 import * as DB from "./db.js";
 import * as Speech from "./speech.js";
 import * as Keyboard from "./keyboard.js";
 import * as Phrases from "./phrases.js";
+import * as Predict from "./predict.js";
 import * as Scanning from "./scanning.js";
 import * as Cloud from "./cloud.js";
 import * as Sync from "./sync.js";
@@ -24,6 +25,13 @@ const state = {
   activeCategory: CATEGORIES[0].id,
   personalTiles: [], // [{id, label, say, category, photoBlob}]
   sentence: [], // [{label, say}]
+};
+
+// Caregiver preferences (persisted in settings, synced via Free+).
+const prefs = {
+  colorCoding: true, // Fitzgerald color coding on tiles
+  speakOnTap: true,  // say each word the moment its tile is tapped
+  autoClear: false,  // empty the sentence after ▶ Speak finishes
 };
 
 // Object URLs created for personal-tile photos; revoked on each re-render.
@@ -89,10 +97,13 @@ function renderGrid() {
     } else {
       picture = el("span", { className: "tile-emoji", textContent: tile.emoji });
     }
+    // Fitzgerald color: starter tiles carry their own; personal tiles take the
+    // category default. Appearance only — never affects position.
+    const fitz = tile.fitz || CATEGORY_FITZ[tile.category || state.activeCategory];
     const btn = el(
       "button",
       {
-        className: "tile",
+        className: "tile" + (prefs.colorCoding && fitz ? ` fitz-${fitz}` : ""),
         onclick: () => onTileTap(tile),
         "aria-label": tile.label,
       },
@@ -107,21 +118,29 @@ function renderSentence() {
   const bar = $("#sentence");
   bar.replaceChildren();
   for (const token of state.sentence) {
-    bar.append(el("span", { className: "token", textContent: token.label }));
+    // Each word is a chip — tapping it repeats just that word.
+    bar.append(
+      el("button", {
+        className: "token",
+        textContent: token.label,
+        "aria-label": `Say ${token.label}`,
+        onclick: () => Speech.speak(token.say),
+      })
+    );
   }
 }
 
 // ---- Interactions ----------------------------------------------------------
 function onTileTap(tile) {
   const say = tile.say || tile.label;
-  Speech.speak(say); // immediate single-word feedback
+  if (prefs.speakOnTap) Speech.speak(say); // immediate single-word feedback
   state.sentence.push({ label: tile.label, say });
   renderSentence();
 }
 
-function speakSentence() {
+function speakSentence(opts = {}) {
   if (!state.sentence.length) return;
-  Speech.speak(state.sentence.map((t) => t.say).join(" "));
+  Speech.speak(state.sentence.map((t) => t.say).join(" "), opts);
 }
 
 function clearSentence() {
@@ -131,13 +150,73 @@ function clearSentence() {
 
 // ---- Mode switching (Pictures <-> Keyboard) --------------------------------
 function speakActive() {
-  if (state.mode === "keyboard") Keyboard.speakCurrent();
-  else speakSentence();
+  const opts = prefs.autoClear ? { onend: clearActive } : {};
+  if (state.mode === "keyboard") Keyboard.speakCurrent(opts);
+  else speakSentence(opts);
 }
 
 function clearActive() {
   if (state.mode === "keyboard") Keyboard.clearCurrent();
   else clearSentence();
+}
+
+function undoActive() {
+  if (state.mode === "keyboard") Keyboard.undoWord();
+  else {
+    state.sentence.pop();
+    renderSentence();
+  }
+}
+
+// ---- Toast + guarded Clear ---------------------------------------------------
+let toastTimer = null;
+function showToast(msg) {
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 1800);
+}
+
+// A sentence a child worked hard to build shouldn't vanish on a stray tap:
+// pointer users must HOLD ✕ for 600ms (with a visual fill); keyboard and
+// switch-scanning activations (click without a pointer) get a confirm prompt.
+function setupClearButton() {
+  const btn = $("#clear-btn");
+  let holdTimer = null;
+  let justHeld = false;
+
+  const cancelHold = () => {
+    if (holdTimer) clearTimeout(holdTimer);
+    holdTimer = null;
+    btn.classList.remove("holding");
+  };
+
+  btn.addEventListener("pointerdown", () => {
+    // While scanning, taps are switch presses — the engine owns activation.
+    if (Scanning.isEnabled()) return;
+    justHeld = false;
+    btn.classList.add("holding");
+    holdTimer = setTimeout(() => {
+      holdTimer = null;
+      justHeld = true;
+      btn.classList.remove("holding");
+      clearActive();
+      showToast("Cleared");
+    }, 600);
+  });
+  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) {
+    btn.addEventListener(ev, cancelHold);
+  }
+
+  btn.addEventListener("click", (e) => {
+    if (justHeld) { justHeld = false; return; } // the hold already cleared
+    if (e.detail > 0) {
+      showToast("Hold ✕ to clear the sentence");
+    } else if (confirm("Clear the whole sentence?")) {
+      clearActive();
+    }
+  });
 }
 
 async function setMode(mode, { persist = true } = {}) {
@@ -177,6 +256,26 @@ function collectScanItems() {
   return [...shared, ...perMode].flatMap((sel) => [...document.querySelectorAll(sel)]);
 }
 
+// ---- Theme + tile size -------------------------------------------------------
+const darkMedia = window.matchMedia("(prefers-color-scheme: dark)");
+let themeSetting = "light";
+
+function applyTheme(setting) {
+  themeSetting = setting;
+  const resolved = setting === "auto" ? (darkMedia.matches ? "dark" : "light") : setting;
+  document.documentElement.dataset.theme = resolved;
+}
+
+// Follow the device when set to Auto.
+darkMedia.addEventListener("change", () => {
+  if (themeSetting === "auto") applyTheme("auto");
+});
+
+function applyTileSize(size) {
+  document.body.dataset.tilesize = size;
+  Scanning.restart(); // tile rows moved — rebuild the scan model
+}
+
 // ---- Parent mode (child-locked) -------------------------------------------
 function openParentGate() {
   const a = 2 + Math.floor(performance.now() % 7); // changes each open
@@ -203,7 +302,8 @@ async function openParentPanel() {
 
 function closeParentPanel() {
   $("#parent-panel").close();
-  Scanning.resume();
+  // Scanning resumes (and focus returns) in the dialog's "close" handler, so
+  // closing with Esc behaves exactly like the Done button.
 }
 
 async function refreshVoiceOptions() {
@@ -219,7 +319,8 @@ async function refreshVoiceOptions() {
     select.append(
       el("option", {
         value: v.voiceURI,
-        textContent: `${v.name} (${v.lang})`,
+        // localService voices keep talking with no internet — flag them.
+        textContent: `${v.name} (${v.lang})${v.localService ? " — offline" : ""}`,
         selected: v.voiceURI === current,
       })
     );
@@ -272,6 +373,9 @@ async function addPersonal(ev) {
   };
   await DB.addPersonalTile(tile);
   state.personalTiles = await DB.getAllPersonalTiles();
+  // Personal words matter most — teach the keyboard's prediction model too.
+  Predict.learn(label);
+  if (say !== label) Predict.learn(say);
   $("#add-form").reset();
   renderPersonalList();
   renderGrid();
@@ -314,6 +418,7 @@ async function addPhrase(ev) {
   const text = $("#phrase-text").value.trim();
   if (!text) return;
   await Phrases.addPhrase(text);
+  Predict.learn(text);
   $("#phrase-form").reset();
   await renderPhraseList();
   await Keyboard.refreshPhrases();
@@ -331,12 +436,16 @@ async function applyScanSettings() {
   const enabled = $("#scan-enable").checked;
   const stepMs = parseInt($("#scan-speed").value, 10);
   const audio = $("#scan-audio").checked;
+  const holdMs = parseInt($("#scan-hold").value, 10);
+  const debounceMs = parseInt($("#scan-debounce").value, 10);
   await DB.setSetting("scanEnabled", enabled);
   await DB.setSetting("scanStepMs", stepMs);
   await DB.setSetting("scanAudio", audio);
+  await DB.setSetting("scanHoldMs", holdMs);
+  await DB.setSetting("scanDebounceMs", debounceMs);
   // Keep scanning paused while the settings dialog is open; it resumes on close.
   // configure() updates the stored config so resume() uses the new speed/audio.
-  Scanning.configure({ enabled, stepMs, audio });
+  Scanning.configure({ enabled, stepMs, audio, holdMs, debounceMs });
   if ($("#parent-panel").open) Scanning.pause();
 }
 
@@ -489,9 +598,32 @@ async function init() {
     $("#no-speech").hidden = false;
   }
 
-  // Restore saved voice choice.
+  // Ask the browser to protect our IndexedDB from storage-pressure eviction —
+  // a child's vocabulary must not silently disappear.
+  if (navigator.storage && navigator.storage.persist) {
+    navigator.storage.persist().catch(() => {});
+  }
+
+  // Restore look & feel + talking preferences BEFORE first render.
+  const theme = await DB.getSetting("theme", "light");
+  const tileSize = await DB.getSetting("tileSize", "medium");
+  prefs.colorCoding = await DB.getSetting("colorCoding", true);
+  prefs.speakOnTap = await DB.getSetting("speakOnTap", true);
+  prefs.autoClear = await DB.getSetting("autoClear", false);
+  applyTheme(theme);
+  document.body.dataset.tilesize = tileSize; // (scanning isn't running yet)
+  $("#theme-select").value = theme;
+  $("#tilesize-select").value = tileSize;
+  $("#color-coding").checked = prefs.colorCoding;
+  $("#speak-on-tap").checked = prefs.speakOnTap;
+  $("#auto-clear").checked = prefs.autoClear;
+
+  // Restore saved voice choice + speaking rate.
   const savedVoice = await DB.getSetting("voiceURI", null);
   if (savedVoice) Speech.setVoice(savedVoice);
+  const savedRate = await DB.getSetting("rate", 0.95);
+  Speech.setRate(savedRate);
+  $("#rate-slider").value = String(savedRate);
   await Speech.getVoices(); // warm the async voice list
 
   // Load personal tiles.
@@ -505,12 +637,21 @@ async function init() {
   // Initialize the keyboard board (hidden until selected).
   await Keyboard.init({ container: $("#keyboard"), messageEl: $("#sentence") });
 
+  // Make sure the prediction model knows this person's words: personal tile
+  // labels and quick phrases (covers tiles added before this feature existed).
+  for (const t of state.personalTiles) {
+    Predict.learn(t.label);
+    if (t.say && t.say !== t.label) Predict.learn(t.say);
+  }
+  for (const p of await Phrases.getPhrases()) Predict.learn(p.text);
+
   // The scanning engine reads the active board's items and speaks labels.
   Scanning.init({ collectItems: collectScanItems, speak: (t) => Speech.speak(t) });
 
   // Wire shared controls — they route to whichever board is active.
   $("#speak-btn").onclick = speakActive;
-  $("#clear-btn").onclick = clearActive;
+  $("#undo-btn").onclick = undoActive;
+  setupClearButton();
   $("#gear-btn").onclick = openParentGate;
   $("#parent-close").onclick = closeParentPanel;
   $("#add-form").onsubmit = addPersonal;
@@ -522,6 +663,46 @@ async function init() {
   $("#scan-enable").onchange = applyScanSettings;
   $("#scan-speed").onchange = applyScanSettings;
   $("#scan-audio").onchange = applyScanSettings;
+  $("#scan-hold").onchange = applyScanSettings;
+  $("#scan-debounce").onchange = applyScanSettings;
+
+  // Look & feel + talking settings.
+  $("#theme-select").onchange = async (ev) => {
+    applyTheme(ev.target.value);
+    await DB.setSetting("theme", ev.target.value);
+  };
+  $("#tilesize-select").onchange = async (ev) => {
+    applyTileSize(ev.target.value);
+    await DB.setSetting("tileSize", ev.target.value);
+  };
+  $("#color-coding").onchange = async (ev) => {
+    prefs.colorCoding = ev.target.checked;
+    renderGrid();
+    await DB.setSetting("colorCoding", ev.target.checked);
+  };
+  $("#speak-on-tap").onchange = async (ev) => {
+    prefs.speakOnTap = ev.target.checked;
+    await DB.setSetting("speakOnTap", ev.target.checked);
+  };
+  $("#auto-clear").onchange = async (ev) => {
+    prefs.autoClear = ev.target.checked;
+    await DB.setSetting("autoClear", ev.target.checked);
+  };
+
+  // Speaking rate: live preview while dragging, persist on release.
+  $("#rate-slider").oninput = (ev) => Speech.setRate(ev.target.value);
+  $("#rate-slider").onchange = async (ev) => {
+    Speech.setRate(ev.target.value);
+    await DB.setSetting("rate", parseFloat(ev.target.value));
+  };
+  $("#voice-test").onclick = () => Speech.speak("Hi! This is how I will sound.");
+
+  // Settings dialog: resume scanning + hand focus back to the gear button on
+  // close — this runs for Done, Esc, and any other way the dialog closes.
+  $("#parent-panel").addEventListener("close", () => {
+    Scanning.resume();
+    $("#gear-btn").focus();
+  });
 
   // Populate the parent "category" dropdown.
   const sel = $("#p-category");
@@ -537,10 +718,20 @@ async function init() {
   const scanEnabled = await DB.getSetting("scanEnabled", false);
   const scanStepMs = await DB.getSetting("scanStepMs", 1500);
   const scanAudio = await DB.getSetting("scanAudio", true);
+  const scanHoldMs = await DB.getSetting("scanHoldMs", 0);
+  const scanDebounceMs = await DB.getSetting("scanDebounceMs", 0);
   $("#scan-enable").checked = scanEnabled;
   $("#scan-speed").value = String(scanStepMs);
   $("#scan-audio").checked = scanAudio;
-  Scanning.configure({ enabled: scanEnabled, stepMs: scanStepMs, audio: scanAudio });
+  $("#scan-hold").value = String(scanHoldMs);
+  $("#scan-debounce").value = String(scanDebounceMs);
+  Scanning.configure({
+    enabled: scanEnabled,
+    stepMs: scanStepMs,
+    audio: scanAudio,
+    holdMs: scanHoldMs,
+    debounceMs: scanDebounceMs,
+  });
 
   // First-run hint — shown once, only on the picture board.
   const seenHint = await DB.getSetting("seenHint", false);
@@ -549,6 +740,20 @@ async function init() {
   $("#hint-dismiss").onclick = async () => {
     hint.hidden = true;
     await DB.setSetting("seenHint", true);
+  };
+
+  // iOS Safari install hint — Safari has no install prompt of its own, and an
+  // installed PicTalk launches faster + survives Safari cache clearing.
+  const isIOS =
+    /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1); // iPadOS
+  const installed =
+    window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+  const seenIosHint = await DB.getSetting("seenIosHint", false);
+  if (isIOS && !installed && !seenIosHint) $("#ios-hint").hidden = false;
+  $("#ios-hint-dismiss").onclick = async () => {
+    $("#ios-hint").hidden = true;
+    await DB.setSetting("seenIosHint", true);
   };
 
   // Register the service worker for offline use (https or localhost only).

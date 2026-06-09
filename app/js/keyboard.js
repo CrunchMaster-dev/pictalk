@@ -82,11 +82,18 @@ function backspace() {
   refreshPredictions();
 }
 
-export function speakCurrent() {
+export function speakCurrent(opts = {}) {
   const text = buffer.trim();
   if (!text) return;
-  Speech.speak(text);
+  Speech.speak(text, opts);
   Predict.learn(text);
+}
+
+// Remove the last whole word (the shared ⌫ undo button).
+export function undoWord() {
+  buffer = buffer.replace(/\s*\S+\s*$/, "");
+  updateMessage();
+  refreshPredictions();
 }
 
 export function clearCurrent() {

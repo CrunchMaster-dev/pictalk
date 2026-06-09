@@ -15,7 +15,13 @@
 let collectItems = () => [];
 let speak = () => {};
 
-let cfg = { enabled: false, stepMs: 1500, audio: true };
+let cfg = {
+  enabled: false,
+  stepMs: 1500,
+  audio: true,
+  holdMs: 0,      // switch must be held this long to count (tremor filter)
+  debounceMs: 0,  // ignore presses this soon after the previous one (spasm filter)
+};
 
 let active = false;         // the scan loop is currently running
 let paused = false;         // temporarily suspended (e.g. settings dialog open)
@@ -118,12 +124,14 @@ function startRowScan() {
     return;
   }
   highlightRow();
-  scheduleTick();
+  scheduleTick(true);
 }
 
-function scheduleTick() {
+// firstItem: a new cycle just started — give 50% extra dwell so the user can
+// orient before the highlight moves on.
+function scheduleTick(firstItem = false) {
   clearTimer();
-  timer = setTimeout(tick, cfg.stepMs);
+  timer = setTimeout(tick, cfg.stepMs * (firstItem ? 1.5 : 1));
 }
 
 function tick() {
@@ -147,6 +155,34 @@ function tick() {
   scheduleTick();
 }
 
+// ---- Switch press filtering (motor accessibility) ---------------------------
+// holdMs: a press only counts if the switch is HELD that long (tremor filter).
+// debounceMs: ignore presses too soon after an accepted one (spasm filter).
+let pressStart = 0;     // performance.now() when the current press began (0 = none)
+let lastSwitchAt = -1e9; // when the last ACCEPTED press fired
+
+function beginPress() {
+  if (pressStart === 0) pressStart = performance.now();
+}
+
+function endPress() {
+  if (pressStart === 0) return;
+  const held = performance.now() - pressStart;
+  pressStart = 0;
+  if (held >= cfg.holdMs) requestSwitch();
+}
+
+function cancelPress() {
+  pressStart = 0;
+}
+
+function requestSwitch() {
+  const now = performance.now();
+  if (now - lastSwitchAt < cfg.debounceMs) return;
+  lastSwitchAt = now;
+  onSwitch();
+}
+
 function onSwitch() {
   if (!active || paused) return;
   if (phase === "row") {
@@ -155,7 +191,7 @@ function onSwitch() {
     colIndex = 0;
     colPasses = 0;
     highlightItem();
-    scheduleTick();
+    scheduleTick(true);
   } else {
     // Activate the highlighted item.
     const el = (rows[rowIndex] || [])[colIndex];
@@ -212,19 +248,44 @@ function highlightItem() {
 }
 
 // ---- Switch input ----------------------------------------------------------
+// With holdMs = 0 a press fires immediately on keydown/click (snappy, the
+// default). With holdMs > 0 we switch to a press/release model: keydown or
+// pointerdown starts the press, keyup or pointerup commits it if held long
+// enough. pointercancel (e.g. the press became a scroll) discards it.
+const isSwitchKey = (e) => e.key === " " || e.key === "Enter" || e.code === "Space";
+
 function onKey(e) {
-  if (e.key === " " || e.key === "Enter" || e.code === "Space") {
-    e.preventDefault();
-    e.stopPropagation();
-    onSwitch();
-  }
+  if (!isSwitchKey(e)) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if (e.repeat) return; // held key auto-repeat is not extra presses
+  if (cfg.holdMs > 0) beginPress();
+  else requestSwitch();
+}
+
+function onKeyUp(e) {
+  if (!isSwitchKey(e)) return;
+  e.preventDefault();
+  e.stopPropagation();
+  if (cfg.holdMs > 0) endPress();
+}
+
+function onPointerDown() {
+  if (programmatic) return;
+  if (cfg.holdMs > 0) beginPress();
+}
+
+function onPointerUp() {
+  if (programmatic) return;
+  if (cfg.holdMs > 0) endPress();
 }
 
 function onClickCapture(e) {
   if (programmatic) return; // our own activation click — let it through
   e.preventDefault();
   e.stopPropagation();
-  onSwitch();
+  if (cfg.holdMs === 0) requestSwitch();
+  // holdMs > 0: the pointer handlers already judged this press — swallow only.
 }
 
 function clearTimer() {
@@ -236,10 +297,18 @@ function clearTimer() {
 
 function attachSwitch() {
   document.addEventListener("keydown", onKey, true);
+  document.addEventListener("keyup", onKeyUp, true);
+  document.addEventListener("pointerdown", onPointerDown, true);
+  document.addEventListener("pointerup", onPointerUp, true);
+  document.addEventListener("pointercancel", cancelPress, true);
   document.addEventListener("click", onClickCapture, true);
 }
 
 function detachSwitch() {
   document.removeEventListener("keydown", onKey, true);
+  document.removeEventListener("keyup", onKeyUp, true);
+  document.removeEventListener("pointerdown", onPointerDown, true);
+  document.removeEventListener("pointerup", onPointerUp, true);
+  document.removeEventListener("pointercancel", cancelPress, true);
   document.removeEventListener("click", onClickCapture, true);
 }
