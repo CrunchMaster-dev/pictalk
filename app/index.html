@@ -20,6 +20,11 @@
     </div>
   </header>
 
+  <div id="firstrun-hint" class="hint" hidden>
+    <span>👋 Tap a picture to talk, then press <b>▶ Speak</b>. Tap <b>⚙</b> anytime for help.</span>
+    <button id="hint-dismiss" class="btn small">Got it</button>
+  </div>
+
   <nav id="categories" class="categories" aria-label="Categories"></nav>
 
   <main id="grid" class="grid" aria-label="Words"></main>
@@ -37,6 +42,13 @@
       <h2>Parent settings</h2>
       <button id="parent-close" class="btn small" aria-label="Close">Done</button>
     </div>
+
+    <section class="parent-section">
+      <h3>Help</h3>
+      <a class="help-link" href="../guide.html" target="_blank" rel="noopener">
+        📖 How to use PicTalk ↗
+      </a>
+    </section>
 
     <section class="parent-section">
       <h3>Mode</h3>

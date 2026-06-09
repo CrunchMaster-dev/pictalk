@@ -398,6 +398,15 @@ async function init() {
   $("#scan-audio").checked = scanAudio;
   Scanning.configure({ enabled: scanEnabled, stepMs: scanStepMs, audio: scanAudio });
 
+  // First-run hint — shown once, only on the picture board.
+  const seenHint = await DB.getSetting("seenHint", false);
+  const hint = $("#firstrun-hint");
+  if (!seenHint && state.mode === "pictures") hint.hidden = false;
+  $("#hint-dismiss").onclick = async () => {
+    hint.hidden = true;
+    await DB.setSetting("seenHint", true);
+  };
+
   // Register the service worker for offline use (https or localhost only).
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
