@@ -159,7 +159,7 @@ a:focus-visible, .btn:focus-visible {
 .soon {
   display: inline-block; vertical-align: middle; margin-left: 6px;
   font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
-  color: var(--blue); background: #dceaf8; border-radius: 999px; padding: 3px 9px;
+  color: #155488; background: #dceaf8; border-radius: 999px; padding: 3px 9px;
 }
 
 /* Why grid */
@@ -179,9 +179,9 @@ a:focus-visible, .btn:focus-visible {
 }
 .section-personal h2 { color: #fff; font-size: clamp(26px, 4vw, 38px); }
 .section-personal em { color: #ffd9a8; font-style: italic; }
-.section-personal p { font-size: 19px; color: #d4e6f6; margin: 16px auto 0; max-width: 60ch; }
+.section-personal p { font-size: 19px; color: #eef6fd; margin: 16px auto 0; max-width: 60ch; }
 .section-personal .coming {
-  font-size: 15px; color: #a9cdec; font-weight: 700; margin-top: 14px;
+  font-size: 15px; color: #eaf3fb; font-weight: 700; margin-top: 14px;
 }
 .section-personal .btn { margin-top: 26px; }
 
