@@ -165,6 +165,24 @@
       device only. Nothing is ever uploaded.</p>
   </dialog>
 
+  <!-- First-visit welcome / optional Free+ sign-up -->
+  <dialog id="welcome" class="welcome">
+    <div class="welcome-inner">
+      <img src="./icons/icon.svg" alt="" class="welcome-logo" />
+      <h2>Welcome to PicTalk</h2>
+      <p class="welcome-lead">It's free and works offline — <b>no account needed.</b></p>
+      <p class="welcome-sub">Want us to <b>back up your board</b> and sync it to your other
+        devices? Create a free account (Free+). You can always do this later in settings.</p>
+      <form id="welcome-form">
+        <input id="welcome-email" type="email" placeholder="you@example.com" autocomplete="email" required />
+        <button type="submit" class="btn primary welcome-cta">Create my free account</button>
+      </form>
+      <p id="welcome-msg" class="muted" hidden></p>
+      <button id="welcome-skip" class="welcome-skip">Use without an account →</button>
+      <p class="welcome-fine">🔒 Free forever. Nothing is uploaded unless you sign in.</p>
+    </div>
+  </dialog>
+
   <script type="module" src="./js/app.js"></script>
 </body>
 </html>

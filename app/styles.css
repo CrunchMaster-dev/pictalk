@@ -396,3 +396,26 @@ body {
 }
 .fp-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 #fp-status { font-weight: 600; color: #15324f; }
+
+/* ---- First-visit welcome ---- */
+.welcome {
+  width: min(440px, 92vw); border: none; border-radius: 20px; padding: 0;
+  box-shadow: 0 14px 50px rgba(10, 20, 35, 0.35);
+}
+.welcome::backdrop { background: rgba(10, 20, 35, 0.5); }
+.welcome-inner { padding: 28px 26px 24px; text-align: center; }
+.welcome-logo { width: 72px; height: 72px; border-radius: 16px; }
+.welcome-inner h2 { font-size: 26px; color: #15324f; margin: 12px 0 6px; }
+.welcome-lead { font-size: 17px; color: #15324f; }
+.welcome-sub { font-size: 15px; color: #5b6675; line-height: 1.5; margin: 10px 0 16px; }
+#welcome-form { display: flex; flex-direction: column; gap: 10px; }
+#welcome-email {
+  font-size: 17px; padding: 12px; border: 2px solid #d4dce6; border-radius: 12px;
+}
+.welcome-cta { font-size: 18px; padding: 14px; width: 100%; }
+.welcome-skip {
+  background: none; border: none; color: #1d6fb8; font-weight: 700; font-size: 15px;
+  margin-top: 14px; cursor: pointer; padding: 8px;
+}
+.welcome-skip:hover { text-decoration: underline; }
+.welcome-fine { font-size: 13px; color: #2f6b4a; margin-top: 12px; }

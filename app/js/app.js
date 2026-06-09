@@ -422,9 +422,40 @@ async function setupFreePlus() {
     showSignedIn(null);
   };
 
+  // First-visit welcome with optional sign-up.
+  function showWelcome() {
+    $("#firstrun-hint").hidden = true; // welcome is the only first-thing this visit
+    const dlg = $("#welcome");
+    dlg.showModal();
+    $("#welcome-form").onsubmit = async (ev) => {
+      ev.preventDefault();
+      const email = $("#welcome-email").value.trim();
+      if (!email) return;
+      const msg = $("#welcome-msg");
+      try {
+        await Cloud.sendMagicLink(email);
+        msg.textContent = "Check your email for a sign-in link, then come back here. ✓";
+      } catch (e) {
+        msg.textContent = "Couldn't send the link — check the email and try again.";
+      }
+      msg.hidden = false;
+      await DB.setSetting("seenWelcome", true);
+    };
+    $("#welcome-skip").onclick = async () => {
+      dlg.close();
+      await DB.setSetting("seenWelcome", true);
+    };
+  }
+
   await Cloud.onAuthChange((user) => { if (user) onSignedIn(user); else showSignedIn(null); });
   const current = await Cloud.getUser();
-  if (current) onSignedIn(current); else showSignedIn(null);
+  if (current) {
+    onSignedIn(current);
+  } else {
+    showSignedIn(null);
+    const seenWelcome = await DB.getSetting("seenWelcome", false);
+    if (!seenWelcome) showWelcome();
+  }
 }
 
 async function exportMyData() {
