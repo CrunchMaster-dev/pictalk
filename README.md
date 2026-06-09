@@ -5,6 +5,8 @@
 Open that link on any phone, tablet, or computer, then "Add to Home Screen" to
 install it. It works offline after the first visit, and nothing is ever uploaded.
 
+**Questions or want help setting it up?** Email **Groundworkshelps@gmail.com** — happy to help build the perfect board for someone's needs, at no cost.
+
 A **free, private, offline talking picture board** for non-speaking children.
 A child taps pictures to speak — "I want apple" — on any cheap tablet, phone, or
 Chromebook. No account, no subscription, nothing uploaded.
