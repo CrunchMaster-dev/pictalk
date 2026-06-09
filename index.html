@@ -2,128 +2,199 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PicTalk — A free app that speaks for people who can't</title>
+  <meta name="description" content="PicTalk is a free, private, offline communication app for people who can't speak. Tap pictures or type, and it talks out loud. Free forever — works on any phone or tablet." />
   <meta name="theme-color" content="#1d6fb8" />
-  <title>PicTalk</title>
-  <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
-  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="icon" href="./app/icons/icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="./landing.css" />
+  <!-- Open Graph for link sharing -->
+  <meta property="og:title" content="PicTalk — a free voice for people who can't speak" />
+  <meta property="og:description" content="Free, private, offline. Tap pictures or type and it talks out loud. Works on any phone or tablet." />
+  <meta property="og:type" content="website" />
 </head>
 <body>
-  <header class="topbar">
-    <div id="sentence" class="sentence" aria-live="polite" aria-label="Sentence"></div>
-    <div class="controls">
-      <button id="speak-btn" class="btn speak" aria-label="Speak sentence">▶ Speak</button>
-      <button id="clear-btn" class="btn clear" aria-label="Clear sentence">✕</button>
-      <button id="gear-btn" class="btn gear" aria-label="Parent settings">⚙</button>
-    </div>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- NAV -->
+  <header class="nav">
+    <a class="brand" href="/" aria-label="PicTalk home">
+      <img src="./app/icons/icon.svg" alt="" width="40" height="40" />
+      <span>PicTalk</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#help">How it helps</a>
+      <a href="#pros">For professionals</a>
+      <a class="btn btn-primary btn-sm" href="./app/">Open PicTalk</a>
+    </nav>
   </header>
 
-  <nav id="categories" class="categories" aria-label="Categories"></nav>
+  <main id="main">
 
-  <main id="grid" class="grid" aria-label="Words"></main>
-
-  <section id="keyboard" class="keyboard" aria-label="Keyboard" hidden></section>
-
-  <p id="no-speech" class="no-speech" hidden>
-    This device's browser can't speak out loud. The tiles still work, but you may
-    need a different browser (Chrome, Safari, or Edge) for the voice.
-  </p>
-
-  <!-- Parent mode -->
-  <dialog id="parent-panel" class="parent-panel">
-    <div class="parent-head">
-      <h2>Parent settings</h2>
-      <button id="parent-close" class="btn small" aria-label="Close">Done</button>
-    </div>
-
-    <section class="parent-section">
-      <h3>Mode</h3>
-      <p class="muted">Choose how this device talks. Picture board for a child who
-        taps pictures; Keyboard for someone who can read and type.</p>
-      <div class="mode-switch">
-        <label class="mode-opt">
-          <input type="radio" name="mode" value="pictures" /> 🖼️ Picture board
-        </label>
-        <label class="mode-opt">
-          <input type="radio" name="mode" value="keyboard" /> ⌨️ Keyboard
-        </label>
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Free forever · No account needed</p>
+        <h1 id="hero-title">Everyone deserves to&nbsp;be&nbsp;heard.</h1>
+        <p class="lede">
+          PicTalk is a <strong>free</strong> app that speaks for people who can't —
+          tap pictures or type, and it talks out loud.
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-lg" href="./app/">▶ Open PicTalk</a>
+          <a class="btn btn-ghost btn-lg" href="#start">How it works</a>
+        </div>
+        <ul class="chips" aria-label="Key promises">
+          <li>✓ Free</li>
+          <li>✓ Private</li>
+          <li>✓ Works offline</li>
+        </ul>
+      </div>
+      <div class="hero-art" aria-hidden="true">
+        <div class="phone">
+          <img src="./hero-app.png" alt="" />
+        </div>
       </div>
     </section>
 
-    <section class="parent-section">
-      <h3>Switch scanning</h3>
-      <p class="muted">For someone who can't touch the screen accurately. The device
-        highlights items one at a time; press a switch — the spacebar, Enter, or a tap
-        anywhere — to select. Works with plug-in assistive switches too.</p>
-      <label class="check-row">
-        <input id="scan-enable" type="checkbox" /> Turn on switch scanning
-      </label>
-      <label>Scan speed
-        <select id="scan-speed">
-          <option value="700">Fast (0.7s)</option>
-          <option value="1000">Quick (1s)</option>
-          <option value="1500" selected>Medium (1.5s)</option>
-          <option value="2000">Slow (2s)</option>
-          <option value="3000">Very slow (3s)</option>
-        </select>
-      </label>
-      <label class="check-row">
-        <input id="scan-audio" type="checkbox" checked /> Speak each item as it highlights
-      </label>
+    <!-- EMOTIONAL HOOK -->
+    <section class="hook" aria-label="Why PicTalk exists">
+      <p>
+        Imagine not being able to tell anyone you're
+        <span class="hl">hungry</span>, <span class="hl">hurting</span>, or that you
+        <span class="hl">love them</span>. That's daily life for millions of people who
+        can't speak. The devices that give them a voice cost
+        <strong>$5,000&ndash;$15,000</strong> — so the families who need them most go
+        without. <strong>PicTalk is free.</strong>
+      </p>
     </section>
 
-    <section id="phrases-section" class="parent-section" hidden>
-      <h3>Quick phrases</h3>
-      <p class="muted">One-tap sentences for the keyboard. Tapping one speaks it
-        instantly — great for urgent or common things.</p>
-      <form id="phrase-form" class="add-form">
-        <label>New quick phrase
-          <input id="phrase-text" type="text" placeholder="I need my medicine" maxlength="120" />
-        </label>
-        <button type="submit" class="btn primary">Add phrase</button>
-      </form>
-      <div id="phrase-list" class="personal-list"></div>
+    <!-- WHO IT HELPS -->
+    <section id="help" class="section" aria-labelledby="help-title">
+      <h2 id="help-title">One app, four ways to be heard</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="card-emoji" aria-hidden="true">🖼️</div>
+          <h3>Picture board</h3>
+          <p>For children who can't read yet — tap pictures to talk. Add real photos of
+            Mom, the dog, a favorite toy.</p>
+        </article>
+        <article class="card">
+          <div class="card-emoji" aria-hidden="true">⌨️</div>
+          <h3>Talking keyboard</h3>
+          <p>For adults who lost speech to stroke or ALS — type and it speaks, with word
+            prediction and one-tap phrases.</p>
+        </article>
+        <article class="card">
+          <div class="card-emoji" aria-hidden="true">🔘</div>
+          <h3>Switch access</h3>
+          <p>For people who can't touch the screen — the app highlights each choice and
+            they select with one button.</p>
+        </article>
+        <article class="card card-soon">
+          <div class="card-emoji" aria-hidden="true">👁️</div>
+          <h3>Vision tracking <span class="soon">Coming soon</span></h3>
+          <p>Eye-gaze control — choose just by looking, completely hands-free.</p>
+        </article>
+      </div>
     </section>
 
-    <section class="parent-section">
-      <h3>Add a personal tile</h3>
-      <p class="muted">Add the people and things in your child's life — a real photo
-        of Mom, your dog, a favorite toy.</p>
-      <form id="add-form" class="add-form">
-        <label>Word it says
-          <input id="p-label" type="text" placeholder="Mama" maxlength="30" required />
-        </label>
-        <label>Category
-          <select id="p-category"></select>
-        </label>
-        <label>Speak differently? (optional)
-          <input id="p-say" type="text" placeholder="leave blank to say the word above" maxlength="60" />
-        </label>
-        <label>Photo (optional)
-          <input id="p-photo" type="file" accept="image/*" capture="environment" />
-        </label>
-        <button type="submit" class="btn primary">Add tile</button>
-      </form>
+    <!-- WHY DIFFERENT -->
+    <section class="section section-tint" aria-labelledby="why-title">
+      <h2 id="why-title">Why PicTalk is different</h2>
+      <div class="why-grid">
+        <div class="why">
+          <div class="why-big">$0</div>
+          <p><strong>Free forever.</strong> No account, no subscription, no catch. Where
+            others charge $5,000&ndash;$15,000.</p>
+        </div>
+        <div class="why">
+          <div class="why-big">🔒</div>
+          <p><strong>Private by design.</strong> Photos, names, and words stay on the
+            person's own device. Nothing is uploaded.</p>
+        </div>
+        <div class="why">
+          <div class="why-big">📴</div>
+          <p><strong>Works offline.</strong> After the first visit it runs with no
+            internet — anywhere, anytime.</p>
+        </div>
+        <div class="why">
+          <div class="why-big">📱</div>
+          <p><strong>Any device.</strong> A phone, a $50 tablet, a Chromebook, a library
+            computer. If it has a browser, it works.</p>
+        </div>
+      </div>
     </section>
 
-    <section class="parent-section">
-      <h3>Your personal tiles</h3>
-      <div id="personal-list" class="personal-list"></div>
+    <!-- WE'LL BUILD IT WITH YOU -->
+    <section class="section section-personal" aria-labelledby="personal-title">
+      <div class="personal-inner">
+        <h2 id="personal-title">We'll build it <em>with</em> you</h2>
+        <p>
+          Every voice is different. We don't hand you an app and walk away — we'll help
+          you build the perfect board for the person you love: their people, their words,
+          their way. And as their needs change, we stay with you.
+        </p>
+        <p class="coming">Coming soon: free backup &amp; sync across devices (Free+).</p>
+        <a class="btn btn-primary btn-lg" href="mailto:Groundworkshelps@gmail.com?subject=Help%20setting%20up%20PicTalk">
+          Get free help setting it up →
+        </a>
+      </div>
     </section>
 
-    <section class="parent-section">
-      <h3>Voice</h3>
-      <label>Speaking voice
-        <select id="voice-select"></select>
-      </label>
+    <!-- FOR PROFESSIONALS -->
+    <section id="pros" class="section section-tint" aria-labelledby="pros-title">
+      <h2 id="pros-title">For schools, clinics &amp; therapists</h2>
+      <p class="section-sub">
+        PicTalk is free for every family you serve. We'll help you roll it out — training,
+        setup, and support for your team and the people in your care.
+      </p>
+      <a class="btn btn-ghost btn-lg" href="mailto:Groundworkshelps@gmail.com?subject=PicTalk%20for%20our%20organization">
+        Let's talk →
+      </a>
     </section>
 
-    <p class="privacy">🔒 Everything you add — photos, names, words — stays on this
-      device only. Nothing is ever uploaded.</p>
-  </dialog>
+    <!-- START IN 30 SECONDS -->
+    <section id="start" class="section" aria-labelledby="start-title">
+      <h2 id="start-title">Start in 30 seconds</h2>
+      <ol class="steps">
+        <li><span class="step-n">1</span> Open PicTalk in your browser.</li>
+        <li><span class="step-n">2</span> Tap <strong>"Add to Home Screen"</strong> to make it an app.</li>
+        <li><span class="step-n">3</span> That's it — it works offline, forever.</li>
+      </ol>
+      <a class="btn btn-primary btn-lg" href="./app/">▶ Open PicTalk</a>
+    </section>
 
-  <script type="module" src="./js/app.js"></script>
+    <!-- FROM THE MAKER -->
+    <section class="section section-maker" aria-labelledby="maker-title">
+      <h2 id="maker-title">Why I built this</h2>
+      <p>
+        I'm John, from Kansas City. I kept thinking about the families who can't afford a
+        $7,000 communication device — the ones who need it most. So I built a free one,
+        and I'll keep it free. If it can help someone you love, that's the whole point.
+      </p>
+      <p class="maker-sign">— John · <a href="mailto:Groundworkshelps@gmail.com">Groundworkshelps@gmail.com</a></p>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-row">
+      <a class="brand brand-foot" href="/">
+        <img src="./app/icons/icon.svg" alt="" width="32" height="32" />
+        <span>PicTalk</span>
+      </a>
+      <nav class="footer-links" aria-label="Footer">
+        <a href="./app/">Open the app</a>
+        <a href="https://github.com/CrunchMaster-dev/pictalk">Open source</a>
+        <a href="mailto:Groundworkshelps@gmail.com">Contact</a>
+      </nav>
+    </div>
+    <p class="footer-note">
+      🔒 Private by design — nothing ever leaves the person's device. &nbsp;·&nbsp;
+      Free &amp; always will be.
+    </p>
+  </footer>
 </body>
 </html>

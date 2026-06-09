@@ -1,0 +1,237 @@
+/* PicTalk landing page — warm, friendly, accessible.
+   Brand carried from the app: blue #1d6fb8, green #2bb673. */
+
+:root {
+  --blue: #1d6fb8;
+  --blue-dark: #155488;
+  --green: #2bb673;
+  --green-dark: #1f6b47;
+  --ink: #15324f;
+  --body: #44505f;
+  --muted: #5b6675;
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --soft: #eef3f8;
+  --line: #e2e8f0;
+  --radius: 18px;
+  --shadow: 0 6px 24px rgba(21, 50, 79, 0.08);
+  --maxw: 1080px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; animation: none !important; }
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--body);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { color: var(--ink); line-height: 1.15; letter-spacing: -0.01em; }
+strong { color: var(--ink); }
+a { color: var(--blue); }
+
+/* Accessibility: skip link + focus */
+.skip-link {
+  position: absolute; left: -999px; top: 0;
+  background: var(--blue); color: #fff; padding: 10px 16px; border-radius: 0 0 10px 0;
+  z-index: 100;
+}
+.skip-link:focus { left: 0; }
+a:focus-visible, .btn:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-weight: 800; text-decoration: none; cursor: pointer;
+  border-radius: 999px; transition: transform 0.08s ease, background-color 0.15s ease;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--green); color: #08331f; }
+.btn-primary:hover { background: #25a667; }
+.btn-ghost { background: #fff; color: var(--blue-dark); border: 2px solid var(--line); }
+.btn-ghost:hover { border-color: var(--blue); }
+.btn-sm { padding: 9px 18px; font-size: 15px; }
+.btn-lg { padding: 15px 28px; font-size: 18px; }
+
+/* Nav */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 14px 24px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.brand {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-weight: 800; font-size: 22px; color: var(--blue); text-decoration: none;
+}
+.brand img { border-radius: 9px; }
+.nav-links { display: flex; align-items: center; gap: 22px; }
+.nav-links > a:not(.btn) {
+  font-weight: 700; color: var(--muted); text-decoration: none; font-size: 15px;
+}
+.nav-links > a:not(.btn):hover { color: var(--ink); }
+
+/* Layout helper */
+.section {
+  max-width: var(--maxw); margin: 0 auto; padding: 72px 24px;
+}
+.section > h2 {
+  font-size: clamp(26px, 4vw, 38px); text-align: center; margin-bottom: 12px;
+}
+.section-sub {
+  text-align: center; max-width: 620px; margin: 0 auto 26px;
+  font-size: 18px; color: var(--muted);
+}
+.section-tint { max-width: none; background: var(--soft); }
+.section-tint > * { max-width: var(--maxw); margin-left: auto; margin-right: auto; }
+
+/* Hero */
+.hero {
+  max-width: var(--maxw); margin: 0 auto;
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 48px; align-items: center;
+  padding: 64px 24px 56px;
+}
+.eyebrow {
+  font-weight: 800; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--green-dark);
+}
+.hero h1 {
+  font-size: clamp(38px, 6vw, 60px); font-weight: 900; margin: 12px 0 16px;
+}
+.lede { font-size: clamp(18px, 2.4vw, 22px); color: var(--muted); max-width: 30ch; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin: 28px 0 18px; }
+.chips { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; }
+.chips li {
+  background: #eafaf1; color: var(--green-dark); font-weight: 800; font-size: 15px;
+  padding: 7px 16px; border-radius: 999px;
+}
+
+/* Phone mock */
+.hero-art { display: flex; justify-content: center; }
+.phone {
+  width: 280px; max-width: 80vw;
+  border: 10px solid #0e1f33; border-radius: 38px; background: #0e1f33;
+  box-shadow: 0 24px 60px rgba(21, 50, 79, 0.28);
+  overflow: hidden; line-height: 0;
+}
+.phone img { width: 100%; height: auto; display: block; }
+
+/* Emotional hook band */
+.hook {
+  background: linear-gradient(180deg, #ffffff 0%, var(--bg) 100%);
+  padding: 8px 24px 8px;
+}
+.hook p {
+  max-width: 760px; margin: 0 auto; text-align: center;
+  font-size: clamp(20px, 2.8vw, 27px); font-weight: 700; color: var(--ink);
+  line-height: 1.4; padding: 28px 0;
+}
+.hl { color: var(--green); }
+
+/* Cards */
+.cards {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px;
+  margin-top: 16px;
+}
+.card {
+  background: var(--card); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 24px 22px; box-shadow: var(--shadow);
+}
+.card-emoji { font-size: 44px; line-height: 1; margin-bottom: 10px; }
+.card h3 { font-size: 20px; margin-bottom: 8px; }
+.card p { font-size: 15.5px; color: var(--muted); }
+.card-soon { border-style: dashed; border-color: #b9c6d6; background: #f7faff; }
+.soon {
+  display: inline-block; vertical-align: middle; margin-left: 6px;
+  font-size: 11px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--blue); background: #dceaf8; border-radius: 999px; padding: 3px 9px;
+}
+
+/* Why grid */
+.why-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px;
+}
+.why {
+  background: #fff; border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow);
+}
+.why-big { font-size: 40px; font-weight: 900; color: var(--blue); margin-bottom: 8px; }
+.why p { font-size: 16px; color: var(--muted); }
+
+/* Personal section */
+.section-personal { max-width: none; background: var(--blue); color: #eaf3fb; }
+.personal-inner {
+  max-width: 760px; margin: 0 auto; text-align: center;
+}
+.section-personal h2 { color: #fff; font-size: clamp(26px, 4vw, 38px); }
+.section-personal em { color: #ffd9a8; font-style: italic; }
+.section-personal p { font-size: 19px; color: #d4e6f6; margin: 16px auto 0; max-width: 60ch; }
+.section-personal .coming {
+  font-size: 15px; color: #a9cdec; font-weight: 700; margin-top: 14px;
+}
+.section-personal .btn { margin-top: 26px; }
+
+/* Steps */
+.steps {
+  list-style: none; max-width: 620px; margin: 0 auto 28px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.steps li {
+  display: flex; align-items: center; gap: 16px;
+  background: #fff; border: 2px solid var(--line); border-radius: 14px;
+  padding: 16px 20px; font-size: 17px; color: var(--ink); font-weight: 600;
+}
+.step-n {
+  flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--blue); color: #fff; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+#start { text-align: center; }
+#pros { text-align: center; }
+
+/* Maker */
+.section-maker { max-width: 720px; text-align: center; }
+.section-maker p { font-size: 18px; color: var(--muted); margin-top: 10px; }
+.maker-sign { font-weight: 700; color: var(--ink); }
+
+/* Footer */
+.footer {
+  background: #0e1f33; color: #aebfd0; padding: 40px 24px;
+}
+.footer-row {
+  max-width: var(--maxw); margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+}
+.brand-foot { color: #fff; font-size: 18px; }
+.footer-links { display: flex; gap: 22px; flex-wrap: wrap; }
+.footer-links a { color: #cdd9e6; text-decoration: none; font-weight: 600; }
+.footer-links a:hover { color: #fff; }
+.footer-note {
+  max-width: var(--maxw); margin: 22px auto 0; text-align: center;
+  font-size: 14px; color: #7e93aa;
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .hero { grid-template-columns: 1fr; text-align: center; padding-top: 40px; }
+  .hero-copy { order: 1; }
+  .hero-art { order: 2; }
+  .lede, .chips { margin-left: auto; margin-right: auto; }
+  .cta-row, .chips { justify-content: center; }
+  .nav-links > a:not(.btn) { display: none; }
+  .section { padding: 52px 22px; }
+}
