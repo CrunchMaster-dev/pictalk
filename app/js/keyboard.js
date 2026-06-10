@@ -1,23 +1,29 @@
-// PicTalk keyboard board — an on-screen keyboard for literate users who can't speak.
+// PicTalk keyboard board — the "adult board": a phrases-first tile board with
+// the full typing keyboard one tab away.
 //
-// Owns a text buffer. Renders: a prediction row (from predict.js), the keyboard keys
-// (letters + a numbers/symbols layer, with a one-shot shift), and a Quick Phrases row
-// (from phrases.js) that speaks a whole saved sentence on a single tap.
+// Tabs: built-in phrase categories (data.js STARTER_PHRASES) + ⭐ Mine (custom
+// phrases from phrases.js) + ⌨ Type (predictions + keys). Phrase tiles either
+// speak instantly (mode "speak") or drop their words into the message bar to be
+// finished by typing (mode "build" — sentence starters).
 //
 // The shared top-bar message element (#sentence) mirrors the buffer; the shared
-// ▶ Speak / ✕ controls in app.js call speakCurrent() / clearCurrent().
+// ▶ Speak / ⌫ / ✕ controls in app.js call speakCurrent() / undoWord() / clearCurrent().
 
 import * as Speech from "./speech.js";
 import * as Predict from "./predict.js";
 import * as Phrases from "./phrases.js";
+import * as Scanning from "./scanning.js";
+import { PHRASE_CATEGORIES, STARTER_PHRASES } from "./data.js";
 
 let container = null;   // #keyboard
 let messageEl = null;   // #sentence (shared)
-let predRow, keysEl, quickRow;
+let tabsEl, gridEl, typingEl, predRow, keysEl;
 
 let buffer = "";
 let shift = false;      // one-shot capitalization
 let layer = "letters";  // "letters" | "symbols"
+let activeTab = "urgent";   // a PHRASE_CATEGORIES id, or "type"
+let customPhrases = [];     // cached from Phrases.getPhrases()
 
 const LETTERS = [
   ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
@@ -107,6 +113,92 @@ export function getText() {
   return buffer;
 }
 
+// ---- Phrase board ------------------------------------------------------------
+const TABS = [...PHRASE_CATEGORIES, { id: "type", name: "Type", emoji: "⌨️" }];
+
+function setTab(id) {
+  activeTab = id;
+  renderTabs();
+  const typing = id === "type";
+  gridEl.hidden = typing;
+  typingEl.hidden = !typing;
+  if (typing) refreshPredictions();
+  else renderGrid();
+  Scanning.restart(); // board layout changed — rebuild scan rows
+}
+
+function renderTabs() {
+  tabsEl.replaceChildren();
+  for (const t of TABS) {
+    const on = t.id === activeTab;
+    tabsEl.append(
+      el("button", {
+        className: "ptab" + (on ? " on" : ""),
+        "aria-pressed": String(on),
+        "aria-label": t.name,
+        onclick: () => setTab(t.id),
+      },
+        el("span", { textContent: t.emoji }),
+        el("span", { textContent: t.name })
+      )
+    );
+  }
+}
+
+function phrasesFor(catId) {
+  const builtIn = STARTER_PHRASES[catId] || [];
+  const custom = customPhrases.filter((p) => p.category === catId);
+  return [...builtIn, ...custom];
+}
+
+function renderGrid() {
+  gridEl.replaceChildren();
+  const cat = PHRASE_CATEGORIES.find((c) => c.id === activeTab);
+  const items = phrasesFor(activeTab);
+  if (!items.length) {
+    gridEl.append(
+      el("p", { className: "phrase-empty", textContent: "Add your own phrases in ⚙ Parent settings." })
+    );
+    return;
+  }
+  for (const p of items) {
+    const build = p.mode === "build";
+    gridEl.append(
+      el("button", {
+        className: "ptile fitz-" + (cat ? cat.fitz : "purple") + (build ? " builder" : ""),
+        "aria-label": build ? p.text + ", add to message" : p.text,
+        onclick: () => onPhraseTap(p),
+      },
+        el("span", { textContent: build ? p.text + " …" : p.text })
+      )
+    );
+  }
+}
+
+function onPhraseTap(p) {
+  if (p.mode === "build") {
+    // Sentence starter: drop the words into the buffer and go finish typing.
+    insertStarter(p.text);
+    setTab("type");
+  } else {
+    Speech.speak(p.text);
+    Predict.learn(p.text);
+  }
+}
+
+function insertStarter(text) {
+  let t = text;
+  if (buffer.trim() === "") {
+    buffer = "";
+    t = t.charAt(0).toUpperCase() + t.slice(1); // sentence-initial capital
+  } else if (!/\s$/.test(buffer)) {
+    t = " " + t;
+  }
+  buffer += t + " ";
+  shift = false;
+  updateMessage();
+}
+
 // ---- Key handling ----------------------------------------------------------
 function onKey(key) {
   switch (key) {
@@ -165,22 +257,11 @@ function renderKeys() {
   }
 }
 
-// ---- Quick phrases ---------------------------------------------------------
+// ---- Custom phrases --------------------------------------------------------
+// Re-pull custom phrases (called by settings after add/delete).
 export async function refreshPhrases() {
-  const phrases = await Phrases.getPhrases();
-  quickRow.replaceChildren();
-  for (const p of phrases) {
-    quickRow.append(
-      el("button", {
-        className: "quick",
-        onclick: () => Speech.speak(p.text),
-        title: p.text,
-      },
-        el("span", { className: "quick-emoji", textContent: p.emoji }),
-        el("span", { className: "quick-text", textContent: p.text })
-      )
-    );
-  }
+  customPhrases = await Phrases.getPhrases();
+  if (gridEl && activeTab !== "type") renderGrid();
 }
 
 // ---- Lifecycle -------------------------------------------------------------
@@ -188,20 +269,24 @@ export async function init(opts) {
   container = opts.container;
   messageEl = opts.messageEl;
 
+  tabsEl = el("div", { className: "ptabs", "aria-label": "Phrase categories" });
+  gridEl = el("div", { className: "phrase-grid", "aria-label": "Phrases" });
   predRow = el("div", { className: "pred-row", "aria-label": "Word suggestions" });
   keysEl = el("div", { className: "keys" });
-  quickRow = el("div", { className: "quick-row", "aria-label": "Quick phrases" });
-  container.replaceChildren(predRow, keysEl, quickRow);
+  typingEl = el("div", { className: "typing" }, predRow, keysEl);
+  container.replaceChildren(tabsEl, gridEl, typingEl);
 
   await Predict.load();
   renderKeys();
   await refreshPhrases();
+  renderTabs();
+  setTab("urgent");
 }
 
 export function show() {
   container.hidden = false;
   updateMessage();
-  refreshPredictions();
+  setTab("urgent"); // urgent is ALWAYS the landing tab — predictable in a crisis
 }
 
 export function hide() {
