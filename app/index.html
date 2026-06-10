@@ -175,11 +175,27 @@
 
     <section id="phrases-section" class="parent-section" hidden>
       <h3>Quick phrases</h3>
-      <p class="muted">One-tap sentences for the keyboard. Tapping one speaks it
-        instantly — great for urgent or common things.</p>
+      <p class="muted">One-tap phrases for the phrase board. "Speak right away"
+        phrases talk instantly; "sentence starters" drop their words into the
+        message to be finished by typing.</p>
       <form id="phrase-form" class="add-form">
         <label>New quick phrase
           <input id="phrase-text" type="text" placeholder="I need my medicine" maxlength="120" />
+        </label>
+        <label>Where it goes
+          <select id="phrase-category">
+            <option value="mine" selected>⭐ Mine</option>
+            <option value="urgent">🚨 Urgent</option>
+            <option value="needs">🍽️ Needs</option>
+            <option value="social">💬 Social</option>
+            <option value="starters">🧩 Starters</option>
+          </select>
+        </label>
+        <label>When tapped
+          <select id="phrase-mode">
+            <option value="speak" selected>Speak it right away</option>
+            <option value="build">Add to the message (sentence starter)</option>
+          </select>
         </label>
         <button type="submit" class="btn primary">Add phrase</button>
       </form>

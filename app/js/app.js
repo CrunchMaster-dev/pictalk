@@ -8,7 +8,7 @@
 //   5. A child-locked Parent mode (math gate) lets a grown-up add personal tiles
 //      (real photo + spoken word) and pick the speaking voice.
 
-import { CATEGORIES, STARTER_TILES, CATEGORY_FITZ } from "./data.js";
+import { CATEGORIES, STARTER_TILES, CATEGORY_FITZ, PHRASE_CATEGORIES } from "./data.js";
 import * as DB from "./db.js";
 import * as Speech from "./speech.js";
 import * as Keyboard from "./keyboard.js";
@@ -251,7 +251,7 @@ function collectScanItems() {
   const shared = ["#speak-btn", "#clear-btn", "#gear-btn"];
   const perMode =
     state.mode === "keyboard"
-      ? ["#keyboard .pred", "#keyboard .key", "#keyboard .quick"]
+      ? ["#keyboard .ptab", "#keyboard .ptile", "#keyboard .pred", "#keyboard .key"]
       : ["#categories .cat", "#grid .tile"];
   return [...shared, ...perMode].flatMap((sel) => [...document.querySelectorAll(sel)]);
 }
@@ -394,11 +394,15 @@ async function renderPhraseList() {
   const phrases = await Phrases.getPhrases();
   list.replaceChildren();
   for (const p of phrases) {
+    const cat = PHRASE_CATEGORIES.find((c) => c.id === p.category);
     const row = el(
       "div",
       { className: "personal-row" },
       el("span", { className: "thumb thumb-emoji", textContent: p.emoji }),
-      el("span", { className: "personal-meta", textContent: p.text }),
+      el("span", {
+        className: "personal-meta",
+        textContent: `${p.text} · ${cat ? cat.emoji + " " + cat.name : "⭐ Mine"}${p.mode === "build" ? " · starter" : ""}`,
+      }),
       el("button", {
         className: "btn danger small",
         textContent: "Delete",
@@ -417,7 +421,10 @@ async function addPhrase(ev) {
   ev.preventDefault();
   const text = $("#phrase-text").value.trim();
   if (!text) return;
-  await Phrases.addPhrase(text);
+  await Phrases.addPhrase(text, {
+    category: $("#phrase-category").value,
+    mode: $("#phrase-mode").value,
+  });
   Predict.learn(text);
   $("#phrase-form").reset();
   await renderPhraseList();
