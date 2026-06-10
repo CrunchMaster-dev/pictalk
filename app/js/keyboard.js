@@ -53,6 +53,7 @@ const el = (tag, props = {}, ...kids) => {
 // ---- Buffer + display ------------------------------------------------------
 function updateMessage() {
   messageEl.textContent = buffer;
+  messageEl.scrollTop = messageEl.scrollHeight; // keep the newest words visible
 }
 
 function refreshPredictions() {

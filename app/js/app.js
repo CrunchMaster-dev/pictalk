@@ -128,6 +128,7 @@ function renderSentence() {
       })
     );
   }
+  bar.scrollTop = bar.scrollHeight; // keep the newest words visible
 }
 
 // ---- Interactions ----------------------------------------------------------
@@ -765,6 +766,17 @@ async function init() {
 
   // Register the service worker for offline use (https or localhost only).
   if ("serviceWorker" in navigator) {
+    // When an UPDATE takes over a page that was already controlled, reload
+    // once so the new version shows now — without this, cache-first serving
+    // means users keep seeing the old app until some future visit.
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloadedForUpdate = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController && !reloadedForUpdate) {
+        reloadedForUpdate = true;
+        location.reload();
+      }
+    });
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 

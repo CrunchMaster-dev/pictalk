@@ -152,15 +152,19 @@ body {
 .sentence {
   flex: 1;
   min-height: 64px;
+  /* Cap at ~2 lines and scroll inside — a long message must NEVER grow the
+     top bar and squeeze the board below (it reached 9 lines on a phone). */
+  max-height: 100px;
   display: flex;
   align-items: center;
+  align-content: flex-start;
   flex-wrap: wrap;
   gap: 8px;
   padding: 8px 12px;
   background: var(--bg);
   border-radius: var(--radius);
   font-size: 28px;
-  overflow-x: auto;
+  overflow-y: auto;
 }
 
 /* Sentence words are tappable chips — tap one to hear just that word. */
@@ -571,10 +575,12 @@ body[data-tilesize="large"] .grid { grid-template-columns: repeat(auto-fill, min
   padding: 28px 8px;
 }
 
-/* Typing view wrapper (predictions + keys) */
+/* Typing view wrapper (predictions + keys) — anchored to the BOTTOM of the
+   board like a native phone keyboard, so thumbs reach the keys. */
 .typing {
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   gap: 10px;
   flex: 1;
   min-height: 0;
@@ -662,3 +668,43 @@ body[data-tilesize="large"] .grid { grid-template-columns: repeat(auto-fill, min
 .welcome-skip:hover { text-decoration: underline; }
 .welcome-fine { font-size: 13px; color: #2f6b4a; margin-top: 12px; }
 :root[data-theme="dark"] .welcome-fine, :root[data-theme="contrast"] .welcome-fine { color: #7fe0ad; }
+
+/* ---- Small screens (phones) ----
+   Desktop sizes crowd a 390px-wide phone: the top-bar buttons squeeze the
+   message bar and the board paddings waste space. Scale the chrome down;
+   touch targets stay >=44px. */
+@media (max-width: 600px) {
+  .topbar { gap: 6px; padding: 6px; padding-top: max(6px, env(safe-area-inset-top)); }
+  .sentence { font-size: 20px; min-height: 52px; max-height: 80px; padding: 6px 10px; }
+  .token { font-size: 18px; padding: 3px 10px; }
+  .btn { font-size: 17px; padding: 0 12px; }
+  .btn.speak { font-size: 18px; padding: 0 14px; }
+  .btn.undo, .btn.clear { font-size: 20px; }
+  .btn.gear { font-size: 19px; }
+  .ptabs { gap: 6px; }
+  .ptab { font-size: 14px; padding: 8px 10px; gap: 4px; }
+  .phrase-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+  .ptile { font-size: 17px; padding: 16px 10px; min-height: 92px; }
+  .keyboard { padding: 8px; gap: 6px; }
+  .key { height: 50px; font-size: 19px; border-radius: 8px; }
+  .key-fn { font-size: 16px; }
+  .pred-row { min-height: 44px; gap: 6px; }
+  .pred { font-size: 17px; padding: 8px 4px; }
+  .keys { gap: 6px; }
+  .key-row { gap: 4px; }
+  .cat { font-size: 13px; padding: 6px 8px; }
+  .cat .cat-emoji { font-size: 22px; }
+}
+
+/* ---- Short screens (landscape phones) ---- */
+@media (max-height: 500px) {
+  .topbar { padding: 4px 8px; }
+  .sentence { min-height: 44px; max-height: 56px; font-size: 18px; }
+  .keyboard { gap: 4px; padding: 6px 8px; }
+  .keys { gap: 4px; }
+  .key { height: 38px; font-size: 17px; }
+  .pred-row { min-height: 36px; }
+  .pred { font-size: 15px; padding: 4px; }
+  .ptab { padding: 6px 10px; font-size: 14px; }
+  .ptile { min-height: 52px; padding: 10px 8px; font-size: 15px; }
+}
