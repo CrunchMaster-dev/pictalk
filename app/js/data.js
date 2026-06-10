@@ -121,3 +121,57 @@ export const STARTER_TILES = {
     { id: "l-kitchen", label: "kitchen", emoji: "🍳", fitz: "orange" },
   ],
 };
+
+// ---- Phrase board (keyboard mode) -------------------------------------------
+// Built-in one-tap phrases for literate users. SAME append-only contract as
+// tiles: never reorder or remove — only append to the end of a category.
+//   mode: "speak" -> tap speaks the text instantly
+//   mode: "build" -> tap drops the text into the message bar (sentence starter)
+export const PHRASE_CATEGORIES = [
+  { id: "urgent",   name: "Urgent",   emoji: "🚨", fitz: "red" },
+  { id: "needs",    name: "Needs",    emoji: "🍽️", fitz: "orange" },
+  { id: "social",   name: "Social",   emoji: "💬", fitz: "pink" },
+  { id: "starters", name: "Starters", emoji: "🧩", fitz: "blue" },
+  { id: "mine",     name: "Mine",     emoji: "⭐", fitz: "purple" },
+];
+
+export const STARTER_PHRASES = {
+  urgent: [
+    { id: "ph-pain",      text: "I'm in pain",          mode: "speak" },
+    { id: "ph-help",      text: "I need help now",      mode: "speak" },
+    { id: "ph-nurse",     text: "Call my nurse",        mode: "speak" },
+    { id: "ph-wrong",     text: "Something is wrong",   mode: "speak" },
+    { id: "ph-911",       text: "Emergency — call 911", mode: "speak" },
+  ],
+  needs: [
+    { id: "ph-bathroom",  text: "I need the bathroom",        mode: "speak" },
+    { id: "ph-water",     text: "Water, please",              mode: "speak" },
+    { id: "ph-hungry",    text: "I'm hungry",                 mode: "speak" },
+    { id: "ph-medicine",  text: "My medicine, please",        mode: "speak" },
+    { id: "ph-rest",      text: "I'm tired — I want to rest", mode: "speak" },
+    { id: "ph-cold",      text: "I'm cold",                   mode: "speak" },
+    { id: "ph-hot",       text: "I'm hot",                    mode: "speak" },
+    { id: "ph-position",  text: "Please adjust my position",  mode: "speak" },
+  ],
+  social: [
+    { id: "ph-yes",       text: "Yes",                   mode: "speak" },
+    { id: "ph-no",        text: "No",                    mode: "speak" },
+    { id: "ph-thanks",    text: "Thank you",             mode: "speak" },
+    { id: "ph-wait",      text: "Please wait a moment",  mode: "speak" },
+    { id: "ph-hello",     text: "Hello",                 mode: "speak" },
+    { id: "ph-goodbye",   text: "Goodbye",               mode: "speak" },
+    { id: "ph-love",      text: "I love you",            mode: "speak" },
+    { id: "ph-stay",      text: "Can you stay with me?", mode: "speak" },
+  ],
+  starters: [
+    { id: "ph-ineed",     text: "I need",       mode: "build" },
+    { id: "ph-iwant",     text: "I want",       mode: "build" },
+    { id: "ph-bring",     text: "Please bring", mode: "build" },
+    { id: "ph-ifeel",     text: "I feel",       mode: "build" },
+    { id: "ph-canyou",    text: "Can you",      mode: "build" },
+    { id: "ph-whereis",   text: "Where is",     mode: "build" },
+    { id: "ph-dontwant",  text: "I don't want", mode: "build" },
+    { id: "ph-whenis",    text: "When is",      mode: "build" },
+  ],
+  mine: [], // custom phrases (phrases.js) render here
+};
