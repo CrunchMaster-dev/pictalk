@@ -1,0 +1,1 @@
+All project context, constraints, and run commands are in CLAUDE.md in this directory. Read it first and follow it. Global identity, voice, and operating rules are in C:\Users\chris\.claude\CLAUDE.md.
